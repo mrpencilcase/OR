@@ -10,7 +10,9 @@ methote (RLP) by Ikuhara and Priouz.
 
 """
 import numpy as np
-
+import string
+from numpy import linalg as la
+from math import sqrt
 #function to transorm the coordinats of the lattice in an orhtnormal coordinate
 #system. The function requires the lattice parameters a,b,c and the three angle
 #alpha, beta and gamma in [rad]
@@ -51,3 +53,94 @@ def hkl_max(rezVec,R):
         miller = miller + 1
         g =np.sqrt(np.square(rezVec[0]*miller)+np.square(rezVec[1]*miller)+np.square(rezVec[2]*miller))
     return miller -1
+    
+     
+# Function to rotate lattice around the [1,0,0] axis
+def rot_x(lattice,alpha):
+    c = np.cos(alpha)
+    s = np.sin(alpha)
+    
+    rot_m = np.array([ [ c, s, 0] ,
+                       [-s, c, 0] ,
+                       [  0,0, 1] ])
+    
+    lattice_rot = np.dot(lattice,rot_m)
+    return lattice_rot    
+# Function to rotate lattice around the [0,0,1] axis
+def rot_z(lattice,alpha):
+    c = np.cos(alpha)
+    s = np.sin(alpha)
+    
+    rot_m = np.array([ [ 1, 0, 0] ,
+                       [ 0, c, s] ,
+                       [ 0,-s, c] ])
+    
+    lattice_rot = np.dot(lattice,rot_m)
+    return lattice_rot
+    
+    
+    
+def read_data(path,supercell):
+ 
+    #read structure parameters from the CONTCAR
+    CONTCAR=open(path +'/CONTCAR','r')
+    CONTCAR.readline()
+    aSc=float(CONTCAR.readline())
+    a1In=[aSc*float(x) for x in CONTCAR.readline().split()]
+    a2In=[aSc*float(x) for x in CONTCAR.readline().split()]
+    a3In=[aSc*float(x) for x in CONTCAR.readline().split()]    
+    CONTCAR.close()
+    # process lattice parameters
+    data = lattice()
+    data.a = la.norm(a1In)/supercell[0]
+    data.b = la.norm(a2In)/supercell[1]
+    data.c = la.norm(a3In)/supercell[2]
+    data.alpha = (np.degrees(np.arccos(np.dot(a1In,a2In)/(la.norm(a1In)*la.norm(a2In)))))
+    data.beta = (np.degrees(np.arccos(np.dot(a1In,a3In)/(la.norm(a1In)*la.norm(a3In)))))
+    data.gamma = (np.degrees(np.arccos(np.dot(a2In,a3In)/(la.norm(a2In)*la.norm(a3In)))))
+
+    return data
+    
+# function to select a specific entry form the data set provided by read_data    
+def select_data(signature,data):
+    for ent in data:
+        if signature+":" in ent:
+            sdata = [x for x in ent.split()]
+            sdata.pop(0)           
+            sdata_float = [float(x) for x in sdata ]            
+            np.asarray(sdata_float)            
+            return sdata_float
+            
+def def_lattice(name,a,b,c,alpha,beta,gamma):
+    latt = lattice()
+    latt.a=a
+    latt.b=b
+    latt.c=c
+    latt.alpha =alpha
+    latt.beta = beta
+    latt.gamma = gamma
+    latt.name = name
+    return latt
+            
+class or_setting:
+    
+        def __init__(self):       
+            self.path_save = "no path yet"
+            self.R_scale = 0
+            self.r_scale = 0.0
+            self.alpha_max = 0 
+            self.alpha_inc = 0 
+            self.beta_max = 0 
+            self.beta_inc = 0 
+            self.gamma_max = 0 
+            self.gamma_inc = 0 
+
+class lattice:
+    def __init__(self):
+        self.a = 0
+        self.b = 0
+        self.c = 0
+        self.alpha = 0
+        self.beta = 0
+        self.gamma = 0
+        self.name = "no name given yet"
