@@ -22,31 +22,37 @@ def or_main_fkt(settings,matA,matB):
     gamma_inc = settings.gamma_inc
     R_scale = settings.R_scale
     r_scale = settings.r_scale
-    # Read geometrical datat of the two strucutres
-    aA     = matA.a
-    bA     = matA.b
-    cA     = matA.c
-    alphaA = matA.alpha
-    betaA  = matA.beta
-    gammaA = matA.gamma
-    
  
     # calculate the lattice of material A in an orthonormal coordinate system
     # and calculate the reviprcal lattice of the new lattice
-    latticeA_orth = or_fkt.orthon_trans(aA,bA,cA,alphaA,betaA,gammaA)
-    latticeA_rec = or_fkt.reziprocal_lattice(latticeA_orth)
+    if settings.method =="Gautam":    
+        aA     = matA.anorm
+        bA     = matA.bnorm
+        cA     = matA.cnorm
+        alphaA = matA.alpha
+        betaA  = matA.beta
+        gammaA = matA.gamma 
+        latticeA_orth = or_fkt.orthon_trans(aA,bA,cA,alphaA,betaA,gammaA)
+        latticeA_rec = or_fkt.reziprocal_lattice(latticeA_orth)
     
-    aB     = matB.a
-    bB     = matB.b
-    cB     = matB.c
-    alphaB = matB.alpha
-    betaB  = matB.beta
-    gammaB = matB.gamma
+        aB     = matB.anorm
+        bB     = matB.bnorm
+        cB     = matB.cnorm
+        alphaB = matB.alpha
+        betaB  = matB.beta
+        gammaB = matB.gamma
+        latticeB_orth = or_fkt.orthon_trans(aB,bB,cB,alphaB,betaB,gammaB)
+
+    elif settings.method =="Zabaleta":
+
+        latticeA = np.vstack((matA.a, matA.b,matA.c))
+        latticeA_rec = or_fkt.reziprocal_lattice(latticeA)    
+        latticeB = np.vstack((matB.a, matB.b, matB.c))
     
     # calculate the lattice of material B in an orthonormal coordinate system
     # the reciprokal lattice of B will be calculated later since it is the 
     # one that will be rotated
-    latticeB_orth = or_fkt.orthon_trans(aB,bB,cB,alphaB,betaB,gammaB)
+    
     # set the maximal radius of R and r
     # R defines how many lattice planes are looked at
     # r sets the volumes around the reciprocal lattice points.
@@ -73,9 +79,7 @@ def or_main_fkt(settings,matA,matB):
                     A_rlp.append([h,k,l,g[0],g[1],g[2]])
                 l = l+  1
             k =k  + 1
-        
         h = h + 1 
-    
     
     alpha = 0
     Valpha=[]            
@@ -83,13 +87,20 @@ def or_main_fkt(settings,matA,matB):
     rj = r
     #start_calc = time.time()
     while alpha <= alpha_max:
+        print("alpha   : {:.1f}°".format(np.rad2deg(alpha)))        
         beta =0
         while beta <= beta_max:
             gamma = 0 
             while gamma <= gamma_max:
                     #print("alpha: " + str(np.rad2deg(alpha))+"°")
-                    #print("beta: " + str(np.rad2deg(beta))+"°")
-                    latticeB_rec = or_fkt.reziprocal_lattice(or_fkt.rot_z(or_fkt.rot_x(latticeB_orth,alpha),beta))
+                    #print("gamma   : {:.1f}°".format(np.rad2deg(gamma)))
+                    if settings.method =="Gautam":
+                    
+                        latticeB_rec = or_fkt.reziprocal_lattice_Gautam(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB_orth,gamma),beta),alpha))
+
+                    elif settings.method == "Zabaleta": 
+                        
+                        latticeB_rec = or_fkt.reziprocal_lattice(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB,gamma),beta),alpha))
                     # find the maximal h,k and l values.
                     B_rlp=[]       
                   
@@ -137,5 +148,5 @@ def or_main_fkt(settings,matA,matB):
         dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta),np.rad2deg(beta) ))
         dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
         for ent in  Valpha:
-            dat.write("{:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2]))
+            dat.write("{:f} {:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2],ent[3]))
         

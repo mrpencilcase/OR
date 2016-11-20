@@ -38,12 +38,27 @@ def orthon_trans(a,b,c,alpha,beta,gamma):
     
     
 # Calculate the reziprokal lattice vectors a*, b* and c* by inverting orhonomral basis 
-def reziprocal_lattice(lattice):    
+def reziprocal_lattice_Gautam(lattice):    
     
     rl = np.linalg.pinv(lattice)
     
     return rl
 
+def reziprocal_lattice(lattice_real):
+    
+    a1 = lattice_real[0,:]
+    a2 = lattice_real[1,:]
+    a3 = lattice_real[2,:]
+    Ve = np.dot(a1,np.cross(a2,a3))
+
+    g1 = 2 * np.pi * (np.cross(a2,a3))/Ve
+    g2 = 2 * np.pi * (np.cross(a3,a1))/Ve
+    g3 = 2 * np.pi * (np.cross(a1,a2))/Ve
+
+    lattice_rec = np.vstack((g1,g2,g3))
+
+    return lattice_rec
+    
 # Find the last reziprocal points miller indizes that lies within the the given radius R
 # along the reziprokal vector rezVec.
 def hkl_max(rezVec,R):
@@ -92,9 +107,12 @@ def read_data(path,supercell):
     CONTCAR.close()
     # process lattice parameters
     data = lattice()
-    data.a = la.norm(a1In)/supercell[0]
-    data.b = la.norm(a2In)/supercell[1]
-    data.c = la.norm(a3In)/supercell[2]
+    data.a = a1In
+    data.b = a2In
+    data.c = a3In
+    data.anorm = la.norm(a1In)/supercell[0]
+    data.bnorm = la.norm(a2In)/supercell[1]
+    data.cnorm = la.norm(a3In)/supercell[2]
     data.alpha = (np.degrees(np.arccos(np.dot(a1In,a2In)/(la.norm(a1In)*la.norm(a2In)))))
     data.beta = (np.degrees(np.arccos(np.dot(a1In,a3In)/(la.norm(a1In)*la.norm(a3In)))))
     data.gamma = (np.degrees(np.arccos(np.dot(a2In,a3In)/(la.norm(a2In)*la.norm(a3In)))))
@@ -116,6 +134,9 @@ def def_lattice(name,a,b,c,alpha,beta,gamma):
     latt.a=a
     latt.b=b
     latt.c=c
+    latt.anorm = la.norm(a)
+    latt.bnorm = la.norm(b)
+    latt.cnorm = la.norm(c)    
     latt.alpha =alpha
     latt.beta = beta
     latt.gamma = gamma
@@ -126,6 +147,7 @@ class or_setting:
     
         def __init__(self):       
             self.path_save = "no path yet"
+            self.method = "no methode selected"            
             self.R_scale = 0
             self.r_scale = 0.0
             self.alpha_max = 0 
@@ -134,12 +156,16 @@ class or_setting:
             self.beta_inc = 0 
             self.gamma_max = 0 
             self.gamma_inc = 0 
+            
 
 class lattice:
     def __init__(self):
-        self.a = 0
-        self.b = 0
-        self.c = 0
+        self.a = np.zeros(3)
+        self.b = np.zeros(3)
+        self.c = np.zeros(3)
+        self.anorm = 1
+        self.bnorm = 1
+        self.cnorm = 1
         self.alpha = 0
         self.beta = 0
         self.gamma = 0

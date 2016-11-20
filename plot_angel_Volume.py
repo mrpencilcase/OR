@@ -12,33 +12,35 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 # Read data from file
-path = "C:\Users\Lukas\Documents\Diplomarbeit\Results\OrientationalRelations\V_alphaAl2O3_Cr5Al8_R3_r0.3.dat"
-alpha = []
-beta = []
-V = []
-R_select = 10
+path = "C:/Users/Lukas/Documents/Diplomarbeit/findOR/OrientationalRelations/_CoO_YSZ"
+
+R_select = 3
 gamma_select = 0.0
 
 files = os.listdir(path)
 
 for filename in files:
-    if "R{}".format(R_select) in filename:
-        with open(path,"r") as Vfile:
+    if "R{}_".format(R_select) in filename:
+        alpha = []
+        beta = []
+        V = []
+        
+        with open("{}/{}".format(path,filename),"r") as Vfile:
             data = list(Vfile)
             for ent in data:
                 if "#" in ent:
                     print(ent)
                 else:
                     line = [x for x in ent.split()]
-                    if ent[3] == gamma_select:            
+                    if float(line[3]) == gamma_select:            
                         V.append(float(line[0]))
                         alpha.append(float(line[1]))
                         beta.append(float(line[2]))
 
-
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-
-ax.plot_trisurf(alpha, beta, V, cmap=cm.jet, linewidth=0.2)
-
-plt.show()
+        
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        
+        ax.plot_trisurf(alpha, beta, V, cmap=cm.jet, linewidth=0.2)
+        
+        plt.show()
