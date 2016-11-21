@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 # Read data from file
-path = "C:/Users/Lukas/Documents/Diplomarbeit/findOR/OrientationalRelations/_CoO_YSZ"
+path = "C:\Users\Lukas\Documents\Diplomarbeit\Results\OrientationalRelations\CoO_YSZ"
 
-R_select = 3
+R_select = 5
 gamma_select = 0.0
 
 files = os.listdir(path)

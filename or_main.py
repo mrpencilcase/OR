@@ -76,7 +76,7 @@ def or_main_fkt(settings,matA,matB):
             while l <= l_max:
                 g = latticeA_rec[0]*h + latticeA_rec[1]*k + latticeA_rec[2]*l
                 if np.sqrt(sum(np.square(g))) <= R: 
-                    A_rlp.append([h,k,l,g[0],g[1],g[2]])
+                    A_rlp.append([g[0],g[1],g[2]])
                 l = l+  1
             k =k  + 1
         h = h + 1 
@@ -85,12 +85,15 @@ def or_main_fkt(settings,matA,matB):
     Valpha=[]            
     ri = r
     rj = r
+    r2= 2*r 
+    pi12 = np.pi/12
     #start_calc = time.time()
     while alpha <= alpha_max:
-        print("alpha   : {:.1f}°".format(np.rad2deg(alpha)))        
         beta =0
         while beta <= beta_max:
+            
             gamma = 0 
+            start_time = time.time()
             while gamma <= gamma_max:
                     #print("alpha: " + str(np.rad2deg(alpha))+"°")
                     #print("gamma   : {:.1f}°".format(np.rad2deg(gamma)))
@@ -112,7 +115,7 @@ def or_main_fkt(settings,matA,matB):
                             while l <= l_max:
                                 g = latticeB_rec[0]*h + latticeB_rec[1]*k + latticeB_rec[2]*l
                                 if np.sqrt(sum(np.square(g))) <= R: 
-                                     B_rlp.append([h,k,l,g[0],g[1],g[2]])             
+                                     B_rlp.append([g[0],g[1],g[2]])             
                                 l = l+ 1
                             k = k + 1
                         h = h + 1     
@@ -121,20 +124,22 @@ def or_main_fkt(settings,matA,matB):
                     # calculate the the overlaping volumes of the reciprocal lattice points
                     # and summ it up
                     Vab = 0   
-        
+                    
                     #start = time.time()
                     for entA in A_rlp:
                         for entB in B_rlp:
-                            d = np.sqrt(np.square(entA[3]-entB[3])+np.square(entA[4]-entB[4])+np.square(entA[5]-entB[5]))       
-                            if d <= ri+rj:
-                                Vij = np.pi/(12*d)*np.square(ri+rj-d)*(np.square(d)+2*d*(ri+rj)-3*np.square(ri-rj))
-                                Vab = Vab + Vij
+                            d = np.sqrt(np.square(entA[0]-entB[0])+np.square(entA[1]-entB[1])+np.square(entA[2]-entB[2]))       
+                            if d <= r2:
+#                                Vij = np.pi/(12*d)*np.square(ri+rj-d)*(np.square(d)+2*d*(ri+rj)-3*np.square(ri-rj))
+                                Vab = Vab + (pi12/d)*np.square(r2-d) * (d*d + 2*d*r2)
                     #print("Time_inc :"+ str(time.time()-start)) 
                     #print("Time_tot:" + str(time.time()-start_calc))
                    # print("Overlapping Volume :" + str(Vab))
                     #print("")    
                     Valpha.append([Vab/V_RLP,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
                     gamma = gamma +gamma_inc
+                    
+            print("R: {}   r: {:.2f}   alpha: {:5.1f}   beta: {:5.1f}   time: {:.2f}".format(R_scale,r_scale,np.rad2deg(alpha),np.rad2deg(beta),time.time()-start_time))
             beta = beta + beta_inc  
         alpha = alpha + alpha_inc
     
@@ -144,8 +149,9 @@ def or_main_fkt(settings,matA,matB):
     #print("")
     with open(settings.path_save+"/V_"+matA.name+"_"+matB.name+"_R"+str(R_scale)+"_r"+str(r_scale)+".dat","w") as dat:
         dat.write("# Interface between {} and {}\n".format(matA.name,matB.name))
-        dat.write("# Alpha = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha),np.rad2deg(alpha) ))
-        dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta),np.rad2deg(beta) ))
+        dat.write("# Alpha = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha_max),np.rad2deg(alpha_inc) ))
+        dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta_max),np.rad2deg(beta_inc) ))
+        dat.write("# Gamma = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(gamma_max),np.rad2deg(gamma_inc) ))
         dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
         for ent in  Valpha:
             dat.write("{:f} {:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2],ent[3]))
