@@ -34,12 +34,12 @@ from multiprocessing import Pool
 #testMatB = or_fkt.def_lattice("CoO",aB,bB,cB,90,90,90)
 
 
-sfA = 4.212
+sfA = 4.213
 aA = [sfA/2, 0    ,     0]
 bA = [0    , sfA/2,     0]
 cA = [0    ,     0, sfA/2]
 
-sfB = 3.022
+sfB = 3.023
 aB = [ sfB/2, sfB/2, -sfB/2]
 bB = [-sfB/2, sfB/2,  sfB/2]
 cB = [ sfB/2,-sfB/2,  sfB/2]
@@ -53,17 +53,17 @@ V = or_fkt.def_lattice("V",aB,bB,cB,90,90,90)
 # settings for OR calculations: Angles
 orset  = or_fkt.or_setting() 
 orset.method = "Zabaleta"
-orset.alpha_max = np.deg2rad(180)
-orset.alpha_inc = np.deg2rad(5)
-orset.beta_max = np.deg2rad(180)
-orset.beta_inc = np.deg2rad(5)
+orset.alpha_max = np.deg2rad(90)
+orset.alpha_inc = np.deg2rad(2)
+orset.beta_max = np.deg2rad(90)
+orset.beta_inc = np.deg2rad(2)
 orset.gamma_max = np.deg2rad(0)
 orset.gamma_inc = np.deg2rad(5)
 
 
 
-R =[2,3,5]
-r =[0.1,0.15,0.2,0.25,0.3,0.35]
+R =[5]
+r =[0.25,0.3,0.35]
 #R =[10]
 #r =[0.25, 0.3, 0.35]
 #path_base="C:\Users\Lukas\Documents\Diplomarbeit\\findOR\OrientationalRelations\\"

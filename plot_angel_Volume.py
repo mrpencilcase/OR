@@ -14,7 +14,7 @@ import os
 # Read data from file
 path = "C:\Users\Lukas\Documents\Diplomarbeit\Results\OrientationalRelations\MgO_V"
 
-R_select = 2
+R_select = 5
 r_select = [0.1,0.15,0.2,0.25,0.3,0.35]
 gamma_select = 0.0
 beta_select = 0.0
@@ -29,24 +29,32 @@ for filename in files:
         
         with open("{}/{}".format(path,filename),"r") as Vfile:
             data = list(Vfile)
+            matA =data[0].split()[3]
+            matB =data[0].split()[5]
             for ent in data:
                 if "#" in ent:
+                    
                     print(ent)
                 else:
                     line = [x for x in ent.split()]
-                    if float(line[3]) == gamma_select and float(line[2]) == beta_select:            
+                    if float(line[3]) == gamma_select:            
                         V.append(float(line[0]))
                         alpha.append(float(line[1]))
                         beta.append(float(line[2]))
         
                 
-#        fig = plt.figure()
-#        ax = fig.gca(projection='3d')
-#        
-#        ax.plot_trisurf(alpha, beta, V, cmap=cm.jet, linewidth=0.2)
-#        
-#        plt.show()
         fig = plt.figure()
+        ax = fig.gca(projection='3d')
         
-        plt.plot(alpha,V)
+        ax.plot_trisurf(alpha, beta, V, cmap=cm.jet, linewidth=0.2)
+        ax.set_title("OR between {} and {}".format(matA,matB))
+        ax.set_xlabel("Alpha")
+        ax.set_ylabel("Beta")
+        ax.set_zlabel("Overlaping Volume")
+        
+                
         plt.show()
+#        fig = plt.figure()
+#        
+#        plt.plot(alpha,V)
+#        plt.show()
