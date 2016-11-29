@@ -11,6 +11,7 @@ methote (RLP) by Ikuhara and Priouz.
 """
 import numpy as np
 import string
+import cmath
 from numpy import linalg as la
 from math import sqrt
 #function to transorm the coordinats of the lattice in an orhtnormal coordinate
@@ -129,20 +130,34 @@ def select_data(signature,data):
             np.asarray(sdata_float)            
             return sdata_float
             
-def def_lattice(name,a,b,c,alpha,beta,gamma):
+def def_lattice(name,a,b,c):
     latt = lattice()
     latt.a=a
     latt.b=b
     latt.c=c
-    latt.anorm = la.norm(a)
-    latt.bnorm = la.norm(b)
-    latt.cnorm = la.norm(c)    
-    latt.alpha =alpha
-    latt.beta = beta
-    latt.gamma = gamma
-    latt.name = name
     return latt
-            
+    
+def intensity_lattice_point(unit_cell,g):
+    g_norm = la.norm(g)
+    
+    I1 = 0
+    I2 = 0  
+    pii = 2j*np.pi      
+    for ent in unit_cell:
+        fj = at_scat_factr(ent[0],gnorm)
+        rj = np.vstack((ent[1],ent[2],ent[3]))
+        alpha = rj*g*pii
+        I1 += fj * cmath.cos(alpha)
+        I2 += fj * cmath.sin(alpha)
+    I = np.square(I1) + np.square(I2)
+    
+    return I
+        
+def at_scat_factr(ele, dk):
+    f = ele 
+
+    return f        
+        
 class or_setting:
     
         def __init__(self):       
@@ -163,10 +178,25 @@ class lattice:
         self.a = np.zeros(3)
         self.b = np.zeros(3)
         self.c = np.zeros(3)
-        self.anorm = 1
-        self.bnorm = 1
-        self.cnorm = 1
-        self.alpha = 0
-        self.beta = 0
-        self.gamma = 0
         self.name = "no name given yet"
+        
+        def anorm(self):
+            return la.norm(self.a)
+        
+        def bnorm(self):
+            return la.norm(self.b)
+        
+        def cnorm(self):
+            return la.norm(self.c)            
+            
+        def alpha(self):
+            return np.degrees(np.arccos(np.dot(self.a,self.b)/(la.norm(self.a)*la.norm(self.b))))
+
+        def beta(self):
+            return np.degrees(np.arccos(np.dot(self.a,self.c)/(la.norm(self.a)*la.norm(self.c))))
+
+        def gamma(self):
+            return np.degrees(np.arccos(np.dot(self.b,self.c)/(la.norm(self.b)*la.norm(self.c))))
+
+
+        

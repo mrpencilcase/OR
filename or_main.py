@@ -94,6 +94,7 @@ def or_main_fkt(settings,matA,matB):
         beta =0
         while beta <= beta_max:
             
+            start_inc = time.time()            
             gamma = 0 
             #start_time = time.time()
             while gamma <= gamma_max:
@@ -157,7 +158,7 @@ def or_main_fkt(settings,matA,matB):
                     Valpha.append([Vab,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
                     gamma = gamma +gamma_inc
                     
-            print("R: {}   r: {:.2f}   alpha: {:5.1f}   beta: {:5.1f}   time: {:.2f}".format(R_scale,r_scale,np.rad2deg(alpha),np.rad2deg(beta),time.time()-start_calc))
+            print("R: {}   r: {:.2f}   alpha: {:5.1f}   beta: {:5.1f}   time_tot: {:.2f}   time_inc: {:.2f}".format(R_scale,r_scale,np.rad2deg(alpha),np.rad2deg(beta),time.time()-start_calc,time.time()-start_inc))
             beta = beta + beta_inc  
         alpha = alpha + alpha_inc
     
