@@ -9,6 +9,7 @@ Created on Thu Nov 17 11:56:44 2016
 import numpy as np
 import or_main
 import or_fkt
+import or_class
 import time
 import os     
 from multiprocessing import Pool     

@@ -12,6 +12,7 @@ methote (RLP) by Ikuhara and Priouz.
 import numpy as np
 import string
 import cmath
+import or_class
 from numpy import linalg as la
 from math import sqrt
 #function to transorm the coordinats of the lattice in an orhtnormal coordinate
@@ -44,7 +45,7 @@ def reziprocal_lattice_Gautam(lattice):
     rl = np.linalg.pinv(lattice)
     
     return rl
-
+# Conventional algorithm to calculate the reciprocal lattice
 def reziprocal_lattice(lattice_real):
     
     a1 = lattice_real[0,:]
@@ -71,7 +72,7 @@ def hkl_max(rezVec,R):
     return miller -1
     
      
-# Function to rotate lattice around the [1,0,0] axis
+# Rotate lattice around the [1,0,0] axis
 def rot_x(lattice,alpha):
     c = np.cos(alpha)
     s = np.sin(alpha)
@@ -82,7 +83,7 @@ def rot_x(lattice,alpha):
     
     lattice_rot = np.dot(lattice,rot_m)
     return lattice_rot    
-# Function to rotate lattice around the [0,0,1] axis
+# Rotate lattice around the [0,0,1] axis
 def rot_z(lattice,alpha):
     c = np.cos(alpha)
     s = np.sin(alpha)
@@ -100,14 +101,27 @@ def read_data(path,supercell):
  
     #read structure parameters from the CONTCAR
     CONTCAR=open(path +'/CONTCAR','r')
-    CONTCAR.readline()
+    name = CONTCAR.readline()
     aSc=float(CONTCAR.readline())
     a1In=[aSc*float(x) for x in CONTCAR.readline().split()]
     a2In=[aSc*float(x) for x in CONTCAR.readline().split()]
-    a3In=[aSc*float(x) for x in CONTCAR.readline().split()]    
+    a3In=[aSc*float(x) for x in CONTCAR.readline().split()]
+    atom_type = [x for x in CONTCAR.readline().split()]
+    atom_numb = [int(x) for x in CONTCAR.readline().split()]
+    CONTCAR.readline()    
+    
+    i = 1 
+    end = 0 
+    unit_cell = or_class.unitcell()    
+    unit_cell.name = name.rstrip()
+    for x,y in zip(atom_type,atom_numb):
+        end = end + y        
+        while i <= end:
+            unit_cell.ad_atom(x,[float(z) for z in CONTCAR.readline().split()])
+            i = i+1
     CONTCAR.close()
     # process lattice parameters
-    data = lattice()
+    data = or_class.lattice()
     data.a = a1In
     data.b = a2In
     data.c = a3In
@@ -118,7 +132,7 @@ def read_data(path,supercell):
     data.beta = (np.degrees(np.arccos(np.dot(a1In,a3In)/(la.norm(a1In)*la.norm(a3In)))))
     data.gamma = (np.degrees(np.arccos(np.dot(a2In,a3In)/(la.norm(a2In)*la.norm(a3In)))))
 
-    return data
+    return data, unit_cell
     
 # function to select a specific entry form the data set provided by read_data    
 def select_data(signature,data):
@@ -131,72 +145,52 @@ def select_data(signature,data):
             return sdata_float
             
 def def_lattice(name,a,b,c):
-    latt = lattice()
+    latt = or_class.lattice()
     latt.a=a
     latt.b=b
     latt.c=c
     return latt
     
 def intensity_lattice_point(unit_cell,g):
-    g_norm = la.norm(g)
     
+    g_norm = la.norm(g)   
     I1 = 0
     I2 = 0  
     pii = 2j*np.pi      
-    for ent in unit_cell:
-        fj = at_scat_factr(ent[0],gnorm)
-        rj = np.vstack((ent[1],ent[2],ent[3]))
+
+    for ent in unit_cell.atoms:
+        fj = at_scat_factr(ent.ele,g_norm)
+        rj = ent.coord
         alpha = rj*g*pii
         I1 += fj * cmath.cos(alpha)
         I2 += fj * cmath.sin(alpha)
+
     I = np.square(I1) + np.square(I2)
     
     return I
-        
+
+"""
+Function to find the atomic scattering factore of an element(ele) in dependence of 
+the reciprocal vector g. The scattering factors are taken from the book
+Transmission Electron Microscopy and Diffractometry of Materials by B.Fultz and
+H.M.Howe, Springer and can be found in the file atomic_scattering_factor.txt
+"""     
 def at_scat_factr(ele, dk):
-    f = ele 
-
-    return f        
-        
-class or_setting:
-    
-        def __init__(self):       
-            self.path_save = "no path yet"
-            self.method = "no methode selected"            
-            self.R_scale = 0
-            self.r_scale = 0.0
-            self.alpha_max = 0 
-            self.alpha_inc = 0 
-            self.beta_max = 0 
-            self.beta_inc = 0 
-            self.gamma_max = 0 
-            self.gamma_inc = 0 
-            
-
-class lattice:
-    def __init__(self):
-        self.a = np.zeros(3)
-        self.b = np.zeros(3)
-        self.c = np.zeros(3)
-        self.name = "no name given yet"
-        
-        def anorm(self):
-            return la.norm(self.a)
-        
-        def bnorm(self):
-            return la.norm(self.b)
-        
-        def cnorm(self):
-            return la.norm(self.c)            
-            
-        def alpha(self):
-            return np.degrees(np.arccos(np.dot(self.a,self.b)/(la.norm(self.a)*la.norm(self.b))))
-
-        def beta(self):
-            return np.degrees(np.arccos(np.dot(self.a,self.c)/(la.norm(self.a)*la.norm(self.c))))
-
-        def gamma(self):
-            return np.degrees(np.arccos(np.dot(self.b,self.c)/(la.norm(self.b)*la.norm(self.c))))
-
-
-        
+    with open("atomic_scattering_factor.txt","r") as dat:
+        scat_factr = list(dat)
+        s_inc = [float(x) for x in scat_factr[0].split()]
+        for ent in scat_factr: 
+            line = [x for x in ent.split()]
+            if line[0]  == ele:
+                line.pop(0)
+                line = [float(x) for x in line]
+                s = dk/(np.pi*4)
+                i = 1 
+                while i < len(line):
+                    if s < s_inc[i]:
+                        break
+                    i += 1
+                
+                f = (line[i]+line[i-1])/2
+                break
+    return f
