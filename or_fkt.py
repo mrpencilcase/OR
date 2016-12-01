@@ -103,9 +103,9 @@ def read_data(path,supercell):
     CONTCAR=open(path +'/CONTCAR','r')
     name = CONTCAR.readline()
     aSc=float(CONTCAR.readline())
-    a1In=[aSc*float(x) for x in CONTCAR.readline().split()]
-    a2In=[aSc*float(x) for x in CONTCAR.readline().split()]
-    a3In=[aSc*float(x) for x in CONTCAR.readline().split()]
+    a1In=np.asarray([aSc*float(x) for x in CONTCAR.readline().split()])
+    a2In=np.asarray([aSc*float(x) for x in CONTCAR.readline().split()])
+    a3In=np.asarray([aSc*float(x) for x in CONTCAR.readline().split()])
     atom_type = [x for x in CONTCAR.readline().split()]
     atom_numb = [int(x) for x in CONTCAR.readline().split()]
     CONTCAR.readline()    
@@ -114,10 +114,13 @@ def read_data(path,supercell):
     end = 0 
     unit_cell = or_class.unitcell()    
     unit_cell.name = name.rstrip()
+    # Get the absolute position of each individual atom in the unit cell. 
     for x,y in zip(atom_type,atom_numb):
         end = end + y        
         while i <= end:
-            unit_cell.ad_atom(x,[float(z) for z in CONTCAR.readline().split()])
+            a_coord_rel = [float(z) for z in CONTCAR.readline().split()]
+            a_corrd_abs = a1In *a_coord_rel[0] + a2In *a_coord_rel[1] + a2In *a_coord_rel[2]
+            unit_cell.ad_atom(x,a_corrd_abs)
             i = i+1
     CONTCAR.close()
     # process lattice parameters
@@ -156,17 +159,20 @@ def intensity_lattice_point(unit_cell,g):
     g_norm = la.norm(g)   
     I1 = 0
     I2 = 0  
-    pii = 2j*np.pi      
+    dummy1 = 0
+    dummy2 = 0 
+    pi2 = 2*np.pi      
 
     for ent in unit_cell.atoms:
-        fj = at_scat_factr(ent.ele,g_norm)
+        fj = at_scat_factr(ent.element,g_norm)
         rj = ent.coord
-        alpha = rj*g*pii
-        I1 += fj * cmath.cos(alpha)
-        I2 += fj * cmath.sin(alpha)
+        alpha = np.dot(rj,g)*pi2
+        I1 += fj * cmath.cosh(alpha)
+        I2 += fj * cmath.sinh(alpha)
+        dummy1 += fj
+        dummy2 += fj
 
-    I = np.square(I1) + np.square(I2)
-    
+    I = np.square(I1) - np.square(I2)
     return I
 
 """
