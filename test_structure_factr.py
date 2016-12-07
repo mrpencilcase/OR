@@ -45,4 +45,4 @@ Al2O3_lattice_rec = or_fkt.reziprocal_lattice(np.vstack((Al2O3_lattice.a,Al2O3_l
 
 g = g = hkl[0]*Al2O3_lattice_rec[0]+hkl[1]*Al2O3_lattice_rec[1]+hkl[2]*Al2O3_lattice_rec[2]
 
-fi = or_fkt.intensity_lattice_point(Al2O3_unitcell,g)
+fi = or_fkt.reziprocal_lattice_Gautam(Al2O3_lattice)

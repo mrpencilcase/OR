@@ -200,3 +200,31 @@ def at_scat_factr(ele, dk):
                 f = (line[i]+line[i-1])/2
                 break
     return f
+
+
+def intensity_overlap_part(I1,Ri,Rj,d,HW):
+    """
+    Calculate the intensity in a volume of two partially overlapping spheres.
+     
+    """
+    r  = Ri
+    ii = (Rj*Rj-d*d)/(4*np.pi*d*HW)*np.log((r*r)/(r*r+HW*HW)) - HW/(4*d*np.pi)*np.log(r*r+HW*HW)+np.arctan(r/HW)/np.pi
+    r  = d-Rj
+    ii = ii -(Rj*Rj-d*d)/(4*np.pi*d*HW)*np.log((r*r)/(r*r+HW*HW)) - HW/(4*d*np.pi)*np.log(r*r+HW*HW)+np.arctan(r/HW)/np.pi
+    ii = ii * I1
+      
+    return ii
+
+def intensity_overlap_tot(Ij,Ri,d,HWj):
+    """
+    Calculate the intensity of a sphere that has the ohter sphere fully within itself. This is important 
+    when one sphere is significantly larger than the other.
+    """
+    HWj2 = HWj*HWj
+    d2 = d*d
+    a = Ri + d
+    a2 = a*a
+    ij =   d * np.log((a2 + (HWj2)) * d2 /(a2 * (d2 + HWj2))) + Ri*d/a
+    ij = (ij + (HWj2 - d2) /HWj * (np.arctan((Ri + d)/ HWj)- np.arctan(d(HWj))))* 2*Ij /(np.pi*HWj)
+
+    return ij
