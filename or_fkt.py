@@ -15,11 +15,21 @@ import cmath
 import or_class
 from numpy import linalg as la
 from math import sqrt
-#function to transorm the coordinats of the lattice in an orhtnormal coordinate
-#system. The function requires the lattice parameters a,b,c and the three angle
-#alpha, beta and gamma in [rad]
+
 def orthon_trans(a,b,c,alpha,beta,gamma):
+    """
+    Returns the transformation matrix from the inital crystal basis to 
+    a orthogonal one. 
+
+    Input:
+    a,b and c: lengths of the unit cell vectors
+    alpha, beta and gamma: angles of the unit cell
     
+    Output:
+    T = |a1|^T  where a1, a2 and a3 are the direct lattice vectors of 
+        |a2|    the orhtonormal system. 
+        |a3| 
+    """    
     t11 = a
     t12 = b*np.cos(gamma)
     t13 = c* np.cos(gamma) 
@@ -38,7 +48,22 @@ def orthon_trans(a,b,c,alpha,beta,gamma):
           
     return t
     
+def new_at_coord(T, at_coord):
+    """
+    transforms array of atom positions to a new basis
+    uing the transformation matrix T
     
+    Input:
+    T: transformation matrix as a numpy array
+    at_coord: the atom coordinates in form of the custom variable unitcell 
+
+    Output:
+    at_coord_new: the atom coordinates after the transformatin in form of the custom variable unitcell
+    """
+
+
+
+    return at_coord_new
 # Calculate the reziprokal lattice vectors a*, b* and c* by inverting orhonomral basis 
 def reziprocal_lattice_Gautam(lattice):    
     

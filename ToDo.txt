@@ -1,4 +1,2 @@
-1): Determin the max intensity of the RLPs in Mat A and Mat B
-2): With those intensities caluculate p, R1 and R2 with the cutoff value delta0 set to 20%
-3): Calculate the atom positions with the new orthogonal basis
+Calculate the atom positions with the new orthogonal basis
 
