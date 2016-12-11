@@ -16,7 +16,7 @@ import or_class
 from numpy import linalg as la
 from math import sqrt
 
-def orthon_trans(a,b,c,alpha,beta,gamma):
+def orthon_trans(a_v,b_v,c_v,alpha,beta,gamma):
     """
     Returns the transformation matrix from the inital crystal basis to 
     a orthogonal one. 
@@ -30,6 +30,10 @@ def orthon_trans(a,b,c,alpha,beta,gamma):
         |a2|    the orhtonormal system. 
         |a3| 
     """    
+    a = la.norm(a_v)
+    b = la.norm(b_v)
+    c = la.norm(c_v)
+
     t11 = a
     t12 = b*np.cos(gamma)
     t13 = c* np.cos(gamma) 
@@ -48,21 +52,25 @@ def orthon_trans(a,b,c,alpha,beta,gamma):
           
     return t
     
-def new_at_coord(T, at_coord):
+def new_at_coord(T, unti_cell_base):
     """
     transforms array of atom positions to a new basis
     uing the transformation matrix T
     
     Input:
     T: transformation matrix as a numpy array
-    at_coord: the atom coordinates in form of the custom variable unitcell 
+    unti_cell_base: the atom coordinates in form of the custom variable unitcell 
 
     Output:
     at_coord_new: the atom coordinates after the transformatin in form of the custom variable unitcell
     """
+    unit_cell_trans = or_class.unitcell()
+    unit_cell_trans.name = unit_cell_base.name
 
+    for atom in unit_cell_case.atoms:
+        at_coord_new = 1
 
-
+   
     return at_coord_new
 # Calculate the reziprokal lattice vectors a*, b* and c* by inverting orhonomral basis 
 def reziprocal_lattice_Gautam(lattice):    
@@ -125,7 +133,7 @@ def rot_z(lattice,alpha):
 def read_data(path,supercell):
  
     #read structure parameters from the CONTCAR
-    CONTCAR=open(path +'/CONTCAR','r')
+    CONTCAR=open(path,'r')
     name = CONTCAR.readline()
     aSc=float(CONTCAR.readline())
     a1In=np.asarray([aSc*float(x) for x in CONTCAR.readline().split()])

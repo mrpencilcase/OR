@@ -38,6 +38,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
     """
     # transform lattice to orthonormal basis
     latticeA_orth = or_fkt.orthon_trans(lattA.a,lattA.b,lattA.c,lattA.alpha,lattA.beta,lattA.gamma) 
+
     latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
     # calculate atom positons in new basis
     map_intens = []
