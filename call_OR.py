@@ -15,25 +15,37 @@ import os
 import scattering_factors_tool as sftool
 import or_gautam
 import os
+import plot_angel_Volume as pltI
 
-path_skript = os.path.dirname(os.path.realpath(__file__))
-path_folder = path_skript + "\\Cont\\"
-settings = or_class.or_setting()
-settings.alpha_inc = np.deg2rad(5)
-settings.alpha_max = np.deg2rad(90)
-settings.beta_inc = np.deg2rad(5)
-settings.beta_max = np.deg2rad(90)
-settings.gamma_inc = np.deg2rad(5)
-settings.gamma_max = np.deg2rad(0)
-settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results"
+select = 1
 
-V_lattice, V_unit_cell = or_fkt.read_data(path_folder+"V",[1,1,1])
-MnO_lattice, MnO_unit_cell = or_fkt.read_data(path_folder+"MgO",[1,1,1])
-MnO_lattice.name = "MgO"
-V_lattice.name = "V"
+if select == 1:
+    path_skript = os.path.dirname(os.path.realpath(__file__))
+    path_folder = path_skript + "\\Cont\\"
+    settings = or_class.or_setting()
+    settings.alpha_inc = np.deg2rad(5)
+    settings.alpha_max = np.deg2rad(90)
+    settings.beta_inc = np.deg2rad(5)
+    settings.beta_max = np.deg2rad(90)
+    settings.gamma_inc = np.deg2rad(5)
+    settings.gamma_max = np.deg2rad(0)
+    settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results\\"
 
-start = time.time()
+    V_lattice, V_unit_cell = or_fkt.read_data(path_folder+"V",[1,1,1])
+    MnO_lattice, MnO_unit_cell = or_fkt.read_data(path_folder+"MgO",[1,1,1])
+    MnO_lattice.name = "MgO"
+    V_lattice.name = "V"
 
-or_gautam.or_gautam_meth(settings,MnO_lattice, MnO_unit_cell, V_lattice,V_unit_cell)
+    hkl = [[2,2,2],
+           [3,3,3],
+           [4,4,4],
+           [5,5,5]]
 
-print("Total Time: {}".format(time.time()-start))
+
+    start = time.time()
+    for ent in hkl:
+        or_gautam.or_gautam_meth(settings,MnO_lattice, MnO_unit_cell, V_lattice,V_unit_cell,ent)
+
+    print("Total Time: {}".format(time.time()-start))
+elif select == 2:
+    pltI.plot_intens()

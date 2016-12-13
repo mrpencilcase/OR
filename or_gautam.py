@@ -12,7 +12,7 @@ import math
 import os 
 import time
 
-def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
+def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
 
     """
     Find OR of two materials following the methode proposed by Gautam and Howe.
@@ -42,8 +42,8 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
     latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
     # calculate atom positons in new basis
     map_intens = []
-    hkl = [3,3,3]
-    delta0 = 0.2
+    hkl = HKL
+    delta0 = 20
     intensA = []
     gA = []
     h = -hkl[0]
@@ -84,7 +84,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
 
                     latticeB_rec = or_fkt.reziprocal_lattice_Gautam(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB_orth,gamma),beta),alpha))
     
-    
+                    
                     intensB=[]                       
                     gB = []
                     h=-hkl[0]
@@ -111,7 +111,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
                     # calculate the the overlaping volumes of the reciprocal lattice points
                     # and summ it up
                     tot_intens = 0   
-                   
+                    numb_overl = 0 
                     #start = time.time()
                     for intAi, gAi in zip(intensA,gA):
                         for intBj, gBj in zip(intensB,gB):
@@ -125,6 +125,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
                             HWj = intBj*p
                             #Only overlapping spheres are from interest
                             if d < Ri+Rj :
+                                numb_overl += 1 
                                 if d + Rj <= Ri:
                                     I1 = or_fkt.intensity_overlap_tot(intAi,Rj,d,HWi)
                                     I2 = intBj
@@ -139,7 +140,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
                                     tot_intens += I1 + I2
 
  
-                    map_intens.append([tot_intens,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
+                    map_intens.append([tot_intens,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma), numb_overl])
                     gamma = gamma +gamma_inc
                     
             print("alpha: {:5.1f}   beta: {:5.1f}  time: {:5.1f}".format(np.rad2deg(alpha),np.rad2deg(beta),time.time()-start))
@@ -150,13 +151,13 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
     
     #print("Run Time: " + str(time.time()-start_calc))
     #print("")
-    with open(settings.path_save+"/V_"+lattA.name+"_"+lattB.name + "_HKL_"+str(hkl[0])+str(hkl[1])+str(hkl[2])+".dat","w") as dat:
+    with open(settings.path_save+lattA.name+"_"+lattB.name + "_HKL_"+str(hkl[0])+str(hkl[1])+str(hkl[2])+"_d20_"+str(delta0)+ ".dat","w") as dat:
         dat.write("# Interface between {} and {}\n".format(lattA.name,lattB.name))
         dat.write("# Alpha = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha_max),np.rad2deg(alpha_inc) ))
         dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta_max),np.rad2deg(beta_inc) ))
         dat.write("# Gamma = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(gamma_max),np.rad2deg(gamma_inc) ))
         #dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
-        dat.write("# HKL up to = [{},{},{}]".format(hkl[0],hkl[1],hkl[2]))
+        dat.write("# HKL up to = [{},{},{}]\n".format(hkl[0],hkl[1],hkl[2]))
         for ent in  map_intens:
             dat.write("{:f} {:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2],ent[3]))
         
