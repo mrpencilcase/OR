@@ -205,7 +205,7 @@ def intensity_lattice_point(unit_cell,g):
         dummy1 += fj
         dummy2 += fj
 
-    I = np.square(I1) - np.square(I2)
+    I = (np.square(I1) - np.square(I2)).real
     return I
 
 """
@@ -235,16 +235,16 @@ def at_scat_factr(ele, dk):
     return f
 
 
-def intensity_overlap_part(I1,Ri,Rj,d,HW):
+def intensity_overlap_part(Ii,Ri,Rj,d,HWi):
     """
     Calculate the intensity in a volume of two partially overlapping spheres.
      
     """
     r  = Ri
-    ii = (Rj*Rj-d*d)/(4*np.pi*d*HW)*np.log((r*r)/(r*r+HW*HW)) - HW/(4*d*np.pi)*np.log(r*r+HW*HW)+np.arctan(r/HW)/np.pi
+    ii =     (Rj*Rj-d*d)/(4*np.pi*d*HWi)*np.log((r*r)/(r*r+HWi*HWi)) - HWi/(4*d*np.pi)*np.log(r*r+HWi*HWi)+np.arctan(r/HWi)/np.pi
     r  = d-Rj
-    ii = ii -(Rj*Rj-d*d)/(4*np.pi*d*HW)*np.log((r*r)/(r*r+HW*HW)) - HW/(4*d*np.pi)*np.log(r*r+HW*HW)+np.arctan(r/HW)/np.pi
-    ii = ii * I1
+    ii = ii -(Rj*Rj-d*d)/(4*np.pi*d*HWi)*np.log((r*r)/(r*r+HWi*HWi)) - HWi/(4*d*np.pi)*np.log(r*r+HWi*HWi)+np.arctan(r/HWi)/np.pi
+    ii = ii * Ii
       
     return ii
 
@@ -252,12 +252,17 @@ def intensity_overlap_tot(Ij,Ri,d,HWj):
     """
     Calculate the intensity of a sphere that has the ohter sphere fully within itself. This is important 
     when one sphere is significantly larger than the other.
+    Inpunt:
+    Ij = Intensity of bigger sphere
+    Ri = Radius of smaller sphere
+    d = Distance between the spheres
+    HWj = Half width at half maximum of Intensity in j 
     """
     HWj2 = HWj*HWj
     d2 = d*d
     a = Ri + d
     a2 = a*a
     ij =   d * np.log((a2 + (HWj2)) * d2 /(a2 * (d2 + HWj2))) + Ri*d/a
-    ij = (ij + (HWj2 - d2) /HWj * (np.arctan((Ri + d)/ HWj)- np.arctan(d(HWj))))* 2*Ij /(np.pi*HWj)
+    ij = (ij + (HWj2 - d2) /HWj * (np.arctan((Ri + d)/ HWj)- np.arctan(d/HWj)))* 2*Ij /(np.pi*HWj)
 
     return ij

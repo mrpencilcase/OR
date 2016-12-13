@@ -14,21 +14,23 @@ import time
 import os     
 import scattering_factors_tool as sftool
 import or_gautam
+import os
 
+path_skript = os.path.dirname(os.path.realpath(__file__))
+path_folder = path_skript + "\\Cont\\"
 settings = or_class.or_setting()
-settings.alpha_inc = 5
-settings.alpha_max = 90
-settings.beta_inc = 5
-settings.beta_max = 90
-settings.gamma_inc = 5
-settings.gamma_max = 90
+settings.alpha_inc = np.deg2rad(5)
+settings.alpha_max = np.deg2rad(90)
+settings.beta_inc = np.deg2rad(5)
+settings.beta_max = np.deg2rad(90)
+settings.gamma_inc = np.deg2rad(5)
+settings.gamma_max = np.deg2rad(0)
+settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results"
 
-path_folder = "C:\Users\Lukas\Documents\Diplomarbeit\\findOR\CONTCAR\\"
-fuckpath = "C:\Users\Lukas\Documents\Diplomarbeit\fuckyoundOR\CONTCAR/"
-print(fuckpath)
 V_lattice, V_unit_cell = or_fkt.read_data(path_folder+"V",[1,1,1])
 MnO_lattice, MnO_unit_cell = or_fkt.read_data(path_folder+"MgO",[1,1,1])
-
+MnO_lattice.name = "MgO"
+V_lattice.name = "V"
 
 start = time.time()
 

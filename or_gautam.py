@@ -42,7 +42,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
     latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
     # calculate atom positons in new basis
     map_intens = []
-    hkl = [2,2,2]
+    hkl = [3,3,3]
     delta0 = 0.2
     intensA = []
     gA = []
@@ -55,9 +55,10 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
             ghk = latticeA_rec[1] * k * gh
             l = -hkl[2]
             while l <= hkl[2]:
-                g = latticeA_rec[2] * l + ghk
-                intensA.append(or_fkt.intensity_lattice_point(unitA,g))
-                gA.append(g)        
+                if sum(map(abs,[h,k,l])) > 0: 
+                    g = latticeA_rec[2] * l + ghk
+                    intensA.append(or_fkt.intensity_lattice_point(unitA,g))
+                    gA.append(g)        
                 l += 1                
             k += 1
         h += 1
@@ -69,6 +70,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
     """
     alpha = 0
     latticeB_orth = or_fkt.orthon_trans(lattB.a,lattB.b,lattB.c,lattB.alpha,lattB.beta,lattB.gamma)
+    start = time.time()
     while alpha <= alpha_max:
         beta =0
         while beta <= beta_max:
@@ -93,12 +95,13 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
                             ghk = latticeB_rec[1] * k * gh
                             l = -hkl[2]
                             while l <= hkl[2]:
-                                g = latticeB_rec[2] * l + ghk
-                                intensB.append(or_fkt.intensity_lattice_point(unitA,g))
-                                gB.append(g)
+                                if sum(map(abs,[h,k,l])) > 0: 
+                                    g = latticeB_rec[2] * l + ghk
+                                    intensB.append(or_fkt.intensity_lattice_point(unitA,g))
+                                    gB.append(g)
                                 l += 1                
                             k += 1
-                    h += 1
+                        h += 1
                     
                     #Find the maximal Intensities in A and B.       
                     ImaxA = max(intensA)
@@ -115,29 +118,31 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
                                                    
                             d = la.norm(gAi-gBj)
                             d1 = 1/(la.norm(gAi))
-                            p = delta0/(6*d1(ImaxA+ImaxB))
+                            p = delta0/(6*d1*(ImaxA+ImaxB))
                             Ri = 6*intAi*p
                             Rj = 6*intBj*p
+                            HWi = intAi*p
+                            HWj = intBj*p
                             #Only overlapping spheres are from interest
                             if d < Ri+Rj :
                                 if d + Rj <= Ri:
-                                    I1 = or_fkt.intensity_oberlap_tot()
-                                    I2 = 2
+                                    I1 = or_fkt.intensity_overlap_tot(intAi,Rj,d,HWi)
+                                    I2 = intBj
                                     tot_intens += I1 + I2
                                 elif d + Ri <= Rj:
-                                    I1 = or_fkt.intensity_overlap_tot()
-                                    I2 = 2
+                                    I1 = or_fkt.intensity_overlap_tot(intBj,Ri,d,HWj)
+                                    I2 = intAi
                                     tot_intens += I1 + I2
                                 else:
-                                    I1 = or_fkt.intensity_overlap_part()
-                                    I2 = or_fkt.intensity_overlap_part()
+                                    I1 = or_fkt.intensity_overlap_part(intAi,Ri,Rj,d,HWi)
+                                    I2 = or_fkt.intensity_overlap_part(intBj,Rj,Ri,d,HWj)
                                     tot_intens += I1 + I2
 
  
-                    map_intens.append([Vab,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
+                    map_intens.append([tot_intens,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
                     gamma = gamma +gamma_inc
                     
-            print("R: {}   r: {:.2f}   alpha: {:5.1f}   beta: {:5.1f}   time_tot: {:.2f}   time_inc: {:.2f}".format(R_scale,r_scale,np.rad2deg(alpha),np.rad2deg(beta),time.time()-start_calc,time.time()-start_inc))
+            print("alpha: {:5.1f}   beta: {:5.1f}  time: {:5.1f}".format(np.rad2deg(alpha),np.rad2deg(beta),time.time()-start))
             beta = beta + beta_inc  
         alpha = alpha + alpha_inc
     
@@ -145,12 +150,13 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB):
     
     #print("Run Time: " + str(time.time()-start_calc))
     #print("")
-    with open(settings.path_save+"/V_"+matA.name+"_"+matB.name+"_R"+str(R_scale)+"_r"+str(r_scale)+".dat","w") as dat:
-        dat.write("# Interface between {} and {}\n".format(matA.name,matB.name))
+    with open(settings.path_save+"/V_"+lattA.name+"_"+lattB.name + "_HKL_"+str(hkl[0])+str(hkl[1])+str(hkl[2])+".dat","w") as dat:
+        dat.write("# Interface between {} and {}\n".format(lattA.name,lattB.name))
         dat.write("# Alpha = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha_max),np.rad2deg(alpha_inc) ))
         dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta_max),np.rad2deg(beta_inc) ))
         dat.write("# Gamma = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(gamma_max),np.rad2deg(gamma_inc) ))
-        dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
+        #dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
+        dat.write("# HKL up to = [{},{},{}]".format(hkl[0],hkl[1],hkl[2]))
         for ent in  map_intens:
             dat.write("{:f} {:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2],ent[3]))
         
