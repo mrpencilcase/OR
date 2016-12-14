@@ -36,10 +36,9 @@ if select == 1:
     MnO_lattice.name = "MgO"
     V_lattice.name = "V"
 
-    hkl = [[2,2,2],
-           [3,3,3],
-           [4,4,4],
-           [5,5,5]]
+    hkl = [ [2,2,2],
+            [3,3,3],
+                    ]
 
 
     start = time.time()
@@ -47,5 +46,9 @@ if select == 1:
         or_gautam.or_gautam_meth(settings,MnO_lattice, MnO_unit_cell, V_lattice,V_unit_cell,ent)
 
     print("Total Time: {}".format(time.time()-start))
+
 elif select == 2:
-    pltI.plot_intens()
+    path_skript = os.path.dirname(os.path.realpath(__file__))
+    path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results\\"
+    dat_name = "MgO_V_HKL_333_d0_20.0"
+    pltI.plot_intens(path_save + dat_name + ".dat",0)

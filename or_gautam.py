@@ -37,13 +37,15 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
     MATERIAL A: calculate the CRLPs and theire coresponding intensits 
     """
     # transform lattice to orthonormal basis
-    latticeA_orth = or_fkt.orthon_trans(lattA.a,lattA.b,lattA.c,lattA.alpha,lattA.beta,lattA.gamma) 
-
-    latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
+    #latticeA_orth = or_fkt.orthon_trans(lattA.a,lattA.b,lattA.c,lattA.alpha,lattA.beta,lattA.gamma) 
+    #latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
     # calculate atom positons in new basis
+    latticeA_rec = or_fkt.reziprocal_lattice(np.vstack((lattA.a,lattA.b,lattA.c)))
+    latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
+                                                        
     map_intens = []
     hkl = HKL
-    delta0 = 20
+    delta0 = 20.0
     intensA = []
     gA = []
     h = -hkl[0]
@@ -82,9 +84,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
                     #print("alpha: " + str(np.rad2deg(alpha))+"°")
                     #print("gamma   : {:.1f}°".format(np.rad2deg(gamma)))
 
-                    latticeB_rec = or_fkt.reziprocal_lattice_Gautam(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB_orth,gamma),beta),alpha))
-    
-                    
+                    latticeB_rec = or_fkt.reziprocal_lattice(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB,gamma),beta),alpha))          
                     intensB=[]                       
                     gB = []
                     h=-hkl[0]
@@ -151,11 +151,12 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
     
     #print("Run Time: " + str(time.time()-start_calc))
     #print("")
-    with open(settings.path_save+lattA.name+"_"+lattB.name + "_HKL_"+str(hkl[0])+str(hkl[1])+str(hkl[2])+"_d20_"+str(delta0)+ ".dat","w") as dat:
+    with open(settings.path_save+lattA.name+"_"+lattB.name + "_HKL_"+str(hkl[0])+str(hkl[1])+str(hkl[2])+"_d0_"+str(delta0)+ ".dat","w") as dat:
         dat.write("# Interface between {} and {}\n".format(lattA.name,lattB.name))
         dat.write("# Alpha = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha_max),np.rad2deg(alpha_inc) ))
         dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta_max),np.rad2deg(beta_inc) ))
         dat.write("# Gamma = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(gamma_max),np.rad2deg(gamma_inc) ))
+        dat.write("# delta0 = {:.2f}\n".format(delta0))
         #dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
         dat.write("# HKL up to = [{},{},{}]\n".format(hkl[0],hkl[1],hkl[2]))
         for ent in  map_intens:

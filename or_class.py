@@ -54,12 +54,12 @@ class unitcell:
     def __init__(self):
         self.name = "no name given"        
         self.atoms =  []
+        self.elements = []
     def ad_atom(self,ele,coordinates):
         adatom = atom()
         adatom.element=ele
         adatom.coord=coordinates
         self.atoms.append(adatom)
-
 class atom:
     def __init__(self):
         self.element = "no element"

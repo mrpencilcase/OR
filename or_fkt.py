@@ -147,6 +147,7 @@ def read_data(path,supercell):
     end = 0 
     unit_cell = or_class.unitcell()    
     unit_cell.name = name.rstrip()
+    unit_cell.elements = atom_type
     # Get the absolute position of each individual atom in the unit cell. 
     for x,y in zip(atom_type,atom_numb):
         end = end + y        
@@ -192,18 +193,16 @@ def intensity_lattice_point(unit_cell,g):
     g_norm = la.norm(g)   
     I1 = 0
     I2 = 0  
-    dummy1 = 0
-    dummy2 = 0 
     pi2 = 2*np.pi      
 
-    for ent in unit_cell.atoms:
-        fj = at_scat_factr(ent.element,g_norm)
-        rj = ent.coord
-        alpha = np.dot(rj,g)*pi2
-        I1 += fj * cmath.cosh(alpha)
-        I2 += fj * cmath.sinh(alpha)
-        dummy1 += fj
-        dummy2 += fj
+    for ent in unit_cell.elements:
+        fj = at_scat_factr(ent,g_norm)
+        for at in unit_cell.atoms:
+            if ent == at.element:
+                rj = at.coord
+                alpha = np.dot(rj,g)*pi2
+                I1 += fj * cmath.cosh(alpha)
+                I2 += fj * cmath.sinh(alpha)
 
     I = (np.square(I1) - np.square(I2)).real
     return I
@@ -218,18 +217,17 @@ def at_scat_factr(ele, dk):
     with open("atomic_scattering_factor.txt","r") as dat:
         scat_factr = list(dat)
         s_inc = [float(x) for x in scat_factr[0].split()]
+        s = dk/(np.pi*4)
         for ent in scat_factr: 
             line = [x for x in ent.split()]
             if line[0]  == ele:
                 line.pop(0)
-                line = [float(x) for x in line]
-                s = dk/(np.pi*4)
+                line = [float(x) for x in line]             
                 i = 1 
                 while i < len(line):
                     if s < s_inc[i]:
                         break
-                    i += 1
-                
+                    i += 1               
                 f = (line[i]+line[i-1])/2
                 break
     return f
