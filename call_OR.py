@@ -5,19 +5,17 @@ Created on Thu Nov 17 11:56:44 2016
 @author: Lukas
 """
 
+import os
+import time
 
 import numpy as np
+
+import or_gautam
+import plot_angel_Volume as pltI
 import or_main
 import or_fkt
 import or_class
-import time
-import os     
-import scattering_factors_tool as sftool
-import or_gautam
-import os
-import plot_angel_Volume as pltI
-
-select = 2
+select = 1
 # Settings for the calculations
 path_skript = os.path.dirname(os.path.realpath(__file__))
 
@@ -35,19 +33,21 @@ settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\R
 # Read Data for both materials form CONTCAR like files
 path_folder = path_skript + "\\Cont\\"
 
-V_lattice, V_unit_cell = or_fkt.read_data(path_folder+"V",[1,1,1])
 MnO_lattice, MnO_unit_cell = or_fkt.read_data(path_folder+"MgO",[1,1,1])
+V_lattice, V_unit_cell = or_fkt.read_data(path_folder+"V",[1,1,1])
+
 MnO_lattice.name = "MgO"
 V_lattice.name = "V"
 
 
 if select == 1:
-    hkl = [ [2,2,2],
-            [3,3,3],
-                ]
+    hkl = [ 
+        [4,4,4]
+        ]
     start = time.time()
 
     for ent in hkl:
+        print("Start calculation with hkl = {}{}{}".format(ent[0],ent[1],ent[2]))
         path_plt = or_gautam.or_gautam_meth(settings,MnO_lattice, MnO_unit_cell, V_lattice,V_unit_cell,ent)
         pltI.plot_intens(path_plt,0,select)
     
@@ -57,9 +57,10 @@ elif select ==2:
 
     start = time.time()
     R_r = [5]
-    r_r = [0.2,0.25]
+    r_r = [0.2]
     for R in R_r:
         for r in r_r:
+            print("Start calculation with R={:.2f} and r={:.2f}".format(R,r))
             settings.R_scale = R
             settings.r_scale = r
             MnOred = MnO_lattice

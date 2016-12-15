@@ -145,7 +145,7 @@ def read_data(path,supercell):
     
     i = 1 
     end = 0 
-    unit_cell = or_class.unitcell()    
+    unit_cell = or_class.UnitCell()    
     unit_cell.name = name.rstrip()
     unit_cell.elements = atom_type
     # Get the absolute position of each individual atom in the unit cell. 
@@ -153,12 +153,12 @@ def read_data(path,supercell):
         end = end + y        
         while i <= end:
             a_coord_rel = [float(z) for z in CONTCAR.readline().split()]
-            a_corrd_abs = a1In *a_coord_rel[0] + a2In *a_coord_rel[1] + a2In *a_coord_rel[2]
+            a_corrd_abs = a1In *a_coord_rel[0] + a2In *a_coord_rel[1] + a3In *a_coord_rel[2]
             unit_cell.ad_atom(x,a_corrd_abs)
             i = i+1
     CONTCAR.close()
     # process lattice parameters
-    data = or_class.lattice()
+    data = or_class.Lattice()
     data.a = a1In
     data.b = a2In
     data.c = a3In
@@ -182,7 +182,7 @@ def select_data(signature,data):
             return sdata_float
             
 def def_lattice(name,a,b,c):
-    latt = or_class.lattice()
+    latt = or_class.Lattice()
     latt.a=a
     latt.b=b
     latt.c=c
@@ -194,13 +194,16 @@ def intensity_lattice_point(unit_cell,g):
     I1 = 0
     I2 = 0  
     pi2 = 2*np.pi      
-
+    i = 1
     for ent in unit_cell.elements:
         fj = at_scat_factr(ent,g_norm)
         for at in unit_cell.atoms:
             if ent == at.element:
+                print(i)
+                i += 1
                 rj = at.coord
-                alpha = np.dot(rj,g)*pi2
+                alpha = np.dot(rj,g)
+                alpha = alpha*pi2*0.1
                 I1 += fj * cmath.cosh(alpha)
                 I2 += fj * cmath.sinh(alpha)
 

@@ -45,7 +45,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
                                                         
     map_intens = []
     hkl = HKL
-    delta0 = 0.2
+    delta0 = 0.20
     intensA = []
     gA = []
     h = -hkl[0]
@@ -54,7 +54,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
         gh = latticeA_rec[0] * h       
         k = -hkl[1]    
         while k <= hkl[1]:
-            ghk = latticeA_rec[1] * k * gh
+            ghk = latticeA_rec[1] * k + gh
             l = -hkl[2]
             while l <= hkl[2]:
                 if sum(map(abs,[h,k,l])) > 0: 
@@ -92,12 +92,12 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
                         gh = latticeB_rec[0] * h       
                         k = -hkl[1]    
                         while k <= hkl[1]:
-                            ghk = latticeB_rec[1] * k * gh
+                            ghk = latticeB_rec[1] * k + gh
                             l = -hkl[2]
                             while l <= hkl[2]:
                                 if sum(map(abs,[h,k,l])) > 0: 
                                     g = latticeB_rec[2] * l + ghk
-                                    intensB.append(or_fkt.intensity_lattice_point(unitA,g))
+                                    intensB.append(or_fkt.intensity_lattice_point(unitB,g))
                                     gB.append(g)
                                 l += 1                
                             k += 1

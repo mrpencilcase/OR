@@ -8,7 +8,7 @@ classes used in the OR calculations
 import numpy as np 
 from numpy import linalg as la
         
-class or_setting:
+class OrSetting:
     
         def __init__(self):       
             self.path_save = "no path yet"
@@ -23,7 +23,7 @@ class or_setting:
             self.gamma_inc = 0 
             
 
-class lattice:
+class Lattice:
     def __init__(self):
         self.a = np.zeros(3)
         self.b = np.zeros(3)
@@ -50,7 +50,7 @@ class lattice:
 
 
 
-class unitcell:
+class UnitCell:
     def __init__(self):
         self.name = "no name given"        
         self.atoms =  []
