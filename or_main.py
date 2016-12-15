@@ -25,29 +25,10 @@ def or_main_fkt(settings,matA,matB):
  
     # calculate the lattice of material A in an orthonormal coordinate system
     # and calculate the reviprcal lattice of the new lattice
-    if settings.method =="Gautam":    
-        aA     = matA.anorm
-        bA     = matA.bnorm
-        cA     = matA.cnorm
-        alphaA = matA.alpha
-        betaA  = matA.beta
-        gammaA = matA.gamma 
-        latticeA_orth = or_fkt.orthon_trans(aA,bA,cA,alphaA,betaA,gammaA)
-        latticeA_rec = or_fkt.reziprocal_lattice(latticeA_orth)
-    
-        aB     = matB.anorm
-        bB     = matB.bnorm
-        cB     = matB.cnorm
-        alphaB = matB.alpha
-        betaB  = matB.beta
-        gammaB = matB.gamma
-        latticeB_orth = or_fkt.orthon_trans(aB,bB,cB,alphaB,betaB,gammaB)
 
-    elif settings.method =="Zabaleta":
-
-        latticeA = np.vstack((matA.a, matA.b,matA.c))
-        latticeA_rec = or_fkt.reziprocal_lattice(latticeA)    
-        latticeB = np.vstack((matB.a, matB.b, matB.c))
+    latticeA = np.vstack((matA.a, matA.b,matA.c))
+    latticeA_rec = or_fkt.reziprocal_lattice(latticeA)    
+    latticeB = np.vstack((matB.a, matB.b, matB.c))
     
     # calculate the lattice of material B in an orthonormal coordinate system
     # the reciprokal lattice of B will be calculated later since it is the 
@@ -100,13 +81,9 @@ def or_main_fkt(settings,matA,matB):
             while gamma <= gamma_max:
                     #print("alpha: " + str(np.rad2deg(alpha))+"°")
                     #print("gamma   : {:.1f}°".format(np.rad2deg(gamma)))
-                    if settings.method =="Gautam":
-                    
-                        latticeB_rec = or_fkt.reziprocal_lattice_Gautam(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB_orth,gamma),beta),alpha))
-
-                    elif settings.method == "Zabaleta": 
+                
                         
-                        latticeB_rec = or_fkt.reziprocal_lattice(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB,gamma),beta),alpha))
+                    latticeB_rec = or_fkt.reziprocal_lattice(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB,gamma),beta),alpha))
                     # find the maximal h,k and l values.
                     B_rlp=[]       
                     h_max = or_fkt.hkl_max(latticeB_rec[0],R)
@@ -143,18 +120,18 @@ def or_main_fkt(settings,matA,matB):
                             d = d + (entA[1]-entB[1])*(entA[1]-entB[1])
                             d = d + (entA[2]-entB[2])* (entA[2]-entB[2])
                             d = np.sqrt(d)
-#                            d = np.sqrt(np.square(entA[0]-entB[0])+np.square(entA[1]-entB[1])+np.square(entA[2]-entB[2]))       
+                            # d = np.sqrt(np.square(entA[0]-entB[0])+np.square(entA[1]-entB[1])+np.square(entA[2]-entB[2]))       
                             
                             
                             if d <= r2 and d > 0:
-#                                Vij = np.pi/(12*d)*np.square(ri+rj-d)*(np.square(d)+2*d*(ri+rj)-3*np.square(ri-rj))
+                                # Vij = np.pi/(12*d)*np.square(ri+rj-d)*(np.square(d)+2*d*(ri+rj)-3*np.square(ri-rj))
                                 Vab = Vab + (pi12/d)*(r2-d)*(r2-d) * (d*d + 2*d*r2)
                             elif d == 0:
                                 Vab += V_RLP
-                 #print("Time_inc :"+ str(time.time()-start)) 
-                    #print("Time_tot:" + str(time.time()-start_calc))
-                   # print("Overlapping Volume :" + str(Vab))
-                    #print("")    
+                    # print("Time_inc :"+ str(time.time()-start)) 
+                    # print("Time_tot:" + str(time.time()-start_calc))
+                    # print("Overlapping Volume :" + str(Vab))
+                    # print("")    
                     Valpha.append([Vab,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
                     gamma = gamma +gamma_inc
                     
@@ -166,7 +143,8 @@ def or_main_fkt(settings,matA,matB):
     
     #print("Run Time: " + str(time.time()-start_calc))
     #print("")
-    with open(settings.path_save+"/V_"+matA.name+"_"+matB.name+"_R"+str(R_scale)+"_r"+str(r_scale)+".dat","w") as dat:
+    path_save = settings.path_save+"/V_"+matA.name+"_"+matB.name+"_R"+str(R_scale)+"_r"+str(r_scale)+".dat"
+    with open(path_save,"w") as dat:
         dat.write("# Interface between {} and {}\n".format(matA.name,matB.name))
         dat.write("# Alpha = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha_max),np.rad2deg(alpha_inc) ))
         dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta_max),np.rad2deg(beta_inc) ))
@@ -174,4 +152,4 @@ def or_main_fkt(settings,matA,matB):
         dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
         for ent in  Valpha:
             dat.write("{:f} {:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2],ent[3]))
-        
+    return path_save

@@ -17,38 +17,63 @@ import or_gautam
 import os
 import plot_angel_Volume as pltI
 
-select = 1
+select = 2
+# Settings for the calculations
+path_skript = os.path.dirname(os.path.realpath(__file__))
+
+settings = or_class.or_setting()
+settings.alpha_inc = np.deg2rad(5)
+settings.alpha_max = np.deg2rad(90)
+settings.beta_inc = np.deg2rad(5)
+settings.beta_max = np.deg2rad(90)
+settings.gamma_inc = np.deg2rad(5)
+settings.gamma_max = np.deg2rad(0)
+settings.R_scale = 5
+settings.r_scale = 0.25
+settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results\\"
+
+# Read Data for both materials form CONTCAR like files
+path_folder = path_skript + "\\Cont\\"
+
+V_lattice, V_unit_cell = or_fkt.read_data(path_folder+"V",[1,1,1])
+MnO_lattice, MnO_unit_cell = or_fkt.read_data(path_folder+"MgO",[1,1,1])
+MnO_lattice.name = "MgO"
+V_lattice.name = "V"
+
 
 if select == 1:
-    path_skript = os.path.dirname(os.path.realpath(__file__))
-    path_folder = path_skript + "\\Cont\\"
-    settings = or_class.or_setting()
-    settings.alpha_inc = np.deg2rad(5)
-    settings.alpha_max = np.deg2rad(90)
-    settings.beta_inc = np.deg2rad(5)
-    settings.beta_max = np.deg2rad(90)
-    settings.gamma_inc = np.deg2rad(5)
-    settings.gamma_max = np.deg2rad(0)
-    settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results\\"
-
-    V_lattice, V_unit_cell = or_fkt.read_data(path_folder+"V",[1,1,1])
-    MnO_lattice, MnO_unit_cell = or_fkt.read_data(path_folder+"MgO",[1,1,1])
-    MnO_lattice.name = "MgO"
-    V_lattice.name = "V"
-
     hkl = [ [2,2,2],
             [3,3,3],
-                    ]
+                ]
+    start = time.time()
 
+    for ent in hkl:
+        path_plt = or_gautam.or_gautam_meth(settings,MnO_lattice, MnO_unit_cell, V_lattice,V_unit_cell,ent)
+        pltI.plot_intens(path_plt,0,select)
+    
+        print("Total Time: {}".format(time.time()-start))
+
+elif select ==2:
 
     start = time.time()
-    for ent in hkl:
-        or_gautam.or_gautam_meth(settings,MnO_lattice, MnO_unit_cell, V_lattice,V_unit_cell,ent)
+    R_r = [5]
+    r_r = [0.2,0.25]
+    for R in R_r:
+        for r in r_r:
+            settings.R_scale = R
+            settings.r_scale = r
+            MnOred = MnO_lattice
+            MnOred.a = MnOred.a/2
+            MnOred.b = MnOred.b/2
+            MnOred.c = MnOred.c/2
 
+            Vred = V_lattice
+            Va = Vred.anorm/2
+            Vred.a = [-Va,Va,Va]
+            Vred.b = [Va,-Va,Va]
+            Vred.c = [Va,Va,-Va]
+
+            path_plt = or_main.or_main_fkt(settings,MnOred,Vred)
+            pltI.plot_intens(path_plt,0,select)
+    
     print("Total Time: {}".format(time.time()-start))
-
-elif select == 2:
-    path_skript = os.path.dirname(os.path.realpath(__file__))
-    path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results\\"
-    dat_name = "MgO_V_HKL_333_d0_20.0"
-    pltI.plot_intens(path_save + dat_name + ".dat",0)

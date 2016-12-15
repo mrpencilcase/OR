@@ -45,7 +45,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
                                                         
     map_intens = []
     hkl = HKL
-    delta0 = 20.0
+    delta0 = 0.2
     intensA = []
     gA = []
     h = -hkl[0]
@@ -151,14 +151,17 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
     
     #print("Run Time: " + str(time.time()-start_calc))
     #print("")
-    with open(settings.path_save+lattA.name+"_"+lattB.name + "_HKL_"+str(hkl[0])+str(hkl[1])+str(hkl[2])+"_d0_"+str(delta0)+ ".dat","w") as dat:
+    path_save = settings.path_save+lattA.name+"_"+lattB.name + "_HKL_"+str(hkl[0])+str(hkl[1])+str(hkl[2])+"_d0_"+str(delta0)+ ".dat"
+    with open(path_save,"w") as dat:
         dat.write("# Interface between {} and {}\n".format(lattA.name,lattB.name))
         dat.write("# Alpha = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha_max),np.rad2deg(alpha_inc) ))
         dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta_max),np.rad2deg(beta_inc) ))
         dat.write("# Gamma = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(gamma_max),np.rad2deg(gamma_inc) ))
         dat.write("# delta0 = {:.2f}\n".format(delta0))
         #dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
-        dat.write("# HKL up to = [{},{},{}]\n".format(hkl[0],hkl[1],hkl[2]))
+        dat.write("# HKL up to = {} {} {}\n".format(hkl[0],hkl[1],hkl[2]))
         for ent in  map_intens:
             dat.write("{:f} {:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2],ent[3]))
+
+    return path_save
         
