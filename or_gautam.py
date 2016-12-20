@@ -12,7 +12,7 @@ import math
 import os 
 import time
 
-def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
+def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
 
     """
     Find OR of two materials following the methode proposed by Gautam and Howe.
@@ -21,6 +21,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
                 where to save the results.
     lattA/B:    provides the parameters of the lattice of material A and B .
     unitA/B:    contains the atomes and theire positions within the unit cell.
+    hkl: 
     Output:
     The function itself does not return values but creates a file in which the overlapping 
     intensitys, and the corresponding angles are listed.
@@ -36,30 +37,55 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
     """
     MATERIAL A: calculate the CRLPs and theire coresponding intensits 
     """
-    # transform lattice to orthonormal basis
+    #transform lattice to orthonormal basis
     #latticeA_orth = or_fkt.orthon_trans(lattA.a,lattA.b,lattA.c,lattA.alpha,lattA.beta,lattA.gamma) 
     #latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
-    # calculate atom positons in new basis
-    latticeA_rec = or_fkt.reziprocal_lattice(np.vstack((lattA.a,lattA.b,lattA.c)))
+    #calculate atom positons in new basis
+    latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
+    latticeA_rec = or_fkt.reziprocal_lattice(latticeA)
     latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
-                                                        
+    latticeB_rec = or_fkt.reziprocal_lattice(latticeB)             
     map_intens = []
-    hkl = HKL
+    hkl_a = []
+    hkl_b = []
+    if la.norm(latticeA_rec[0,:]) <= la.norm(latticeB_rec[0,:]):
+       
+       hkl_a.append(int(hkl[0] * la.norm(latticeB_rec[0,:]) / la.norm(latticeA_rec[0,:])))
+       hkl_a.append(int(hkl[1] * la.norm(latticeB_rec[1,:]) / la.norm(latticeA_rec[1,:])))
+       hkl_a.append(int(hkl[2] * la.norm(latticeB_rec[2,:]) / la.norm(latticeA_rec[2,:])))
+       
+       hkl_b.append(hkl[0])
+       hkl_b.append(hkl[1])
+       hkl_b.append(hkl[2])
+       
+         
+    elif la.norm(latticeB_rec[0,:]) < la.norm(latticeA_rec[0,:]):
+
+       hkl_b.append(int(hkl[0] * la.norm(latticeA_rec[0,:]) / la.norm(latticeB_rec[0,:])))
+       hkl_b.append(int(hkl[1] * la.norm(latticeA_rec[1,:]) / la.norm(latticeB_rec[1,:])))
+       hkl_b.append(int(hkl[2] * la.norm(latticeA_rec[2,:]) / la.norm(latticeB_rec[2,:])))
+
+       hkl_a.append(hkl[0])
+       hkl_a.append(hkl[1])
+       hkl_a.append(hkl[2])
+       
+    
     delta0 = 0.20
     intensA = []
     gA = []
-    h = -hkl[0]
+    h = -hkl_a[0]
     rlpA = []
-    while h <= hkl[0]:
+    while h <= hkl_a[0]:
         gh = latticeA_rec[0] * h       
-        k = -hkl[1]    
-        while k <= hkl[1]:
+        k = -hkl_a[1]    
+        while k <= hkl_a[1]:
             ghk = latticeA_rec[1] * k + gh
-            l = -hkl[2]
-            while l <= hkl[2]:
+            l = -hkl_a[2]
+            while l <= hkl_a[2]:
                 if sum(map(abs,[h,k,l])) > 0: 
                     g = latticeA_rec[2] * l + ghk
-                    intensA.append(or_fkt.intensity_lattice_point(unitA,g))
+                    #intensA.append(or_fkt.intensity_lattice_point1(unitA,g))
+                    intensA.append(or_fkt.intensity_lattice_point2(unitA,[h,k,l],g))
                     gA.append(g)        
                 l += 1                
             k += 1
@@ -87,17 +113,18 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
                     latticeB_rec = or_fkt.reziprocal_lattice(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB,gamma),beta),alpha))          
                     intensB=[]                       
                     gB = []
-                    h=-hkl[0]
-                    while h <= hkl[0]:
+                    h=-hkl_b[0]
+                    while h <= hkl_b[0]:
                         gh = latticeB_rec[0] * h       
-                        k = -hkl[1]    
-                        while k <= hkl[1]:
+                        k = -hkl_b[1]    
+                        while k <= hkl_b[1]:
                             ghk = latticeB_rec[1] * k + gh
-                            l = -hkl[2]
-                            while l <= hkl[2]:
+                            l = -hkl_b[2]
+                            while l <= hkl_b[2]:
                                 if sum(map(abs,[h,k,l])) > 0: 
                                     g = latticeB_rec[2] * l + ghk
-                                    intensB.append(or_fkt.intensity_lattice_point(unitB,g))
+                                    #intensB.append(or_fkt.intensity_lattice_point1(unitB,g))
+                                    intensB.append(or_fkt.intensity_lattice_point2(unitB,[h,k,l],g))
                                     gB.append(g)
                                 l += 1                
                             k += 1
@@ -143,7 +170,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, HKL):
                     map_intens.append([tot_intens,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma), numb_overl])
                     gamma = gamma +gamma_inc
                     
-            print("alpha: {:5.1f}   beta: {:5.1f}  time: {:5.1f}".format(np.rad2deg(alpha),np.rad2deg(beta),time.time()-start))
+            print("alpha: {:5.1f}   beta: {:5.1f}  intensity:{:.1f}  time: {:5.1f}".format(np.rad2deg(alpha),np.rad2deg(beta),tot_intens,time.time()-start))
             beta = beta + beta_inc  
         alpha = alpha + alpha_inc
     

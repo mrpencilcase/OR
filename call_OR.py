@@ -19,7 +19,7 @@ select = 1
 # Settings for the calculations
 path_skript = os.path.dirname(os.path.realpath(__file__))
 
-settings = or_class.or_setting()
+settings = or_class.OrSetting()
 settings.alpha_inc = np.deg2rad(5)
 settings.alpha_max = np.deg2rad(90)
 settings.beta_inc = np.deg2rad(5)
@@ -42,7 +42,7 @@ V_lattice.name = "V"
 
 if select == 1:
     hkl = [ 
-        [4,4,4]
+        [3,3,3]
         ]
     start = time.time()
 

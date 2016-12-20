@@ -74,7 +74,16 @@ def new_at_coord(T, unti_cell_base):
     return at_coord_new
 # Calculate the reziprokal lattice vectors a*, b* and c* by inverting orhonomral basis 
 def reziprocal_lattice_Gautam(lattice):    
-    
+    """
+    Calculates the reciprocal lattice of Gautams orthonormal lattice
+    by inverting the transformation matrix T. 
+
+    Input: 
+    lattice = Transformation matrix T
+
+    Output: 
+    rl  = reciprocal lattice
+    """
     rl = np.linalg.pinv(lattice)
     
     return rl
@@ -131,8 +140,26 @@ def rot_z(lattice,alpha):
     
     
 def read_data(path,supercell):
- 
-    #read structure parameters from the CONTCAR
+    """
+    Opens a file that contains information about the materials unit cell
+    at the given path and stores the lattice parameter as well as the atom
+    positions in seperate variable which are then returned.
+    
+    Input: 
+    path = path to the file including filename and  file extension
+    supercell = Information if the data in the file represents a singel unit cell
+                or multiple cells. The variable is expectet as a list with three entries
+                representing the number of unit cell in x,y and z direction [nx,ny,nz].
+                
+    Output:
+    lattice = Variable of the class Lattice which contains the geometrical
+              data of the unit cell.  
+    unit_cell = Variable of the class UnitCell wich contains the positons of the
+                singel atoms within the unit cell.
+    """
+
+    # Read the lattice data
+
     CONTCAR=open(path,'r')
     name = CONTCAR.readline()
     aSc=float(CONTCAR.readline())
@@ -154,22 +181,23 @@ def read_data(path,supercell):
         while i <= end:
             a_coord_rel = [float(z) for z in CONTCAR.readline().split()]
             a_corrd_abs = a1In *a_coord_rel[0] + a2In *a_coord_rel[1] + a3In *a_coord_rel[2]
-            unit_cell.ad_atom(x,a_corrd_abs)
+            #unit_cell.ad_atom(x,a_corrd_abs)
+            unit_cell.ad_atom(x,a_coord_rel)
             i = i+1
     CONTCAR.close()
     # process lattice parameters
-    data = or_class.Lattice()
-    data.a = a1In
-    data.b = a2In
-    data.c = a3In
-    data.anorm = la.norm(a1In)/supercell[0]
-    data.bnorm = la.norm(a2In)/supercell[1]
-    data.cnorm = la.norm(a3In)/supercell[2]
-    data.alpha = (np.degrees(np.arccos(np.dot(a1In,a2In)/(la.norm(a1In)*la.norm(a2In)))))
-    data.beta = (np.degrees(np.arccos(np.dot(a1In,a3In)/(la.norm(a1In)*la.norm(a3In)))))
-    data.gamma = (np.degrees(np.arccos(np.dot(a2In,a3In)/(la.norm(a2In)*la.norm(a3In)))))
+    lattice = or_class.Lattice()
+    lattice.a = a1In
+    lattice.b = a2In
+    lattice.c = a3In
+    lattice.anorm = la.norm(a1In)/supercell[0]
+    lattice.bnorm = la.norm(a2In)/supercell[1]
+    lattice.cnorm = la.norm(a3In)/supercell[2]
+    lattice.alpha = (np.degrees(np.arccos(np.dot(a1In,a2In)/(la.norm(a1In)*la.norm(a2In)))))
+    lattice.beta = (np.degrees(np.arccos(np.dot(a1In,a3In)/(la.norm(a1In)*la.norm(a3In)))))
+    lattice.gamma = (np.degrees(np.arccos(np.dot(a2In,a3In)/(la.norm(a2In)*la.norm(a3In)))))
 
-    return data, unit_cell
+    return lattice, unit_cell
     
 # function to select a specific entry form the data set provided by read_data    
 def select_data(signature,data):
@@ -188,7 +216,7 @@ def def_lattice(name,a,b,c):
     latt.c=c
     return latt
     
-def intensity_lattice_point(unit_cell,g):
+def intensity_lattice_point1(unit_cell,g):
     
     g_norm = la.norm(g)   
     I1 = 0
@@ -203,11 +231,31 @@ def intensity_lattice_point(unit_cell,g):
                 i += 1
                 rj = at.coord
                 alpha = np.dot(rj,g)
-                alpha = alpha*pi2*0.1
-                I1 += fj * cmath.cosh(alpha)
-                I2 += fj * cmath.sinh(alpha)
+                alpha = alpha*pi2
+                I1 += fj * cmath.cos(alpha)
+                I2 += fj * cmath.sin(alpha)
 
     I = (np.square(I1) - np.square(I2)).real
+    return I
+
+def intensity_lattice_point2(unit_cell,hkl,g):
+    
+    g_norm = la.norm(g)   
+    I1 = 0
+    I2 = 0  
+    pi2 = 2*np.pi      
+    i = 1
+          
+    for at in unit_cell.atoms:
+      
+        fj = at_scat_factr(at.element,g_norm)
+        rj = at.coord
+        alpha = np.dot(rj,hkl)
+        alpha = alpha*pi2
+        I1 += fj * cmath.cos(alpha)
+        I2 += fj * cmath.sin(alpha)
+
+    I = np.square(I1) - np.square(I2)
     return I
 
 """
