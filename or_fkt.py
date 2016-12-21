@@ -245,18 +245,18 @@ def intensity_lattice_point2(unit_cell,hkl,g):
     I2 = 0  
     pi2 = 2*np.pi      
     i = 1
-          
-    for at in unit_cell.atoms:
-      
-        fj = at_scat_factr(at.element,g_norm)
-        rj = at.coord
-        alpha = np.dot(rj,hkl)
-        alpha = alpha*pi2
-        I1 += fj * cmath.cos(alpha)
-        I2 += fj * cmath.sin(alpha)
+    for ent in unit_cell.elements:  
+        fj = at_scat_factr(ent,g_norm)      
+        for at in unit_cell.atoms:
+            if ent == at.element:    
+                rj = at.coord
+                alpha = rj[0]*hkl[0] + rj[1]*hkl[1]+ rj[2]*hkl[2]
+                alpha = alpha*pi2
+                I1 = I1 + fj * cmath.cos(alpha)
+                I2 = I2 + fj * cmath.sin(alpha)
 
     I = np.square(I1) - np.square(I2)
-    return I
+    return I.real
 
 """
 Function to find the atomic scattering factore of an element(ele) in dependence of 

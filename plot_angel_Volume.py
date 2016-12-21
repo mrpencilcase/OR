@@ -13,7 +13,7 @@ import numpy as np
 import os
 # Read data from file
 
-def plot_intens(path,gamma_select,select):
+def plot_intens(path,gamma_select,select,file_name):
 
    
     alpha = []
@@ -54,7 +54,7 @@ def plot_intens(path,gamma_select,select):
         if not os.path.exists("{}/plots".format(path_dir)):
                 os.makedirs("{}/plots".format(path_dir))
                 
-        fig.savefig("{}/plots/{}_{}_{}_{}{}{}.pdf".format(path_dir,matA,matB,delta0,hkl[0],hkl[1],hkl[2]))    
+        fig.savefig("{}/plots/{}.pdf".format(path_dir,file_name))    
         plt.close(fig)
 
     elif select == 2:

@@ -15,12 +15,15 @@ class OrSetting:
             self.method = "no methode selected"            
             self.R_scale = 0
             self.r_scale = 0.0
-            self.alpha_max = 0 
-            self.alpha_inc = 0 
-            self.beta_max = 0 
-            self.beta_inc = 0 
-            self.gamma_max = 0 
-            self.gamma_inc = 0 
+            self.alpha_start = 0 
+            self.alpha_end = 0
+            self.alpha_inc = 1 
+            self.beta_start = 0 
+            self.beta_end = 0
+            self.beta_inc = 1
+            self.gamma_start = 0
+            self.gamma_end = 0 
+            self.gamma_inc = 1 
             
 
 class Lattice:

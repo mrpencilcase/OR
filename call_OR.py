@@ -15,17 +15,24 @@ import plot_angel_Volume as pltI
 import or_main
 import or_fkt
 import or_class
+
 select = 1
 # Settings for the calculations
 path_skript = os.path.dirname(os.path.realpath(__file__))
 
 settings = or_class.OrSetting()
 settings.alpha_inc = np.deg2rad(5)
-settings.alpha_max = np.deg2rad(90)
+settings.alpha_start = np.deg2rad(0)
+settings.alpha_end = np.deg2rad(90)
+
 settings.beta_inc = np.deg2rad(5)
-settings.beta_max = np.deg2rad(90)
+settings.beta_start = np.deg2rad(0)
+settings.beta_end = np.deg2rad(90)
+
 settings.gamma_inc = np.deg2rad(5)
-settings.gamma_max = np.deg2rad(0)
+settings.gamma_start = np.deg2rad(0)
+settings.gamma_end = np.deg2rad(0)
+
 settings.R_scale = 5
 settings.r_scale = 0.25
 settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results\\"
@@ -42,14 +49,14 @@ V_lattice.name = "V"
 
 if select == 1:
     hkl = [ 
-        [3,3,3]
+        [4,4,4]
         ]
     start = time.time()
 
     for ent in hkl:
         print("Start calculation with hkl = {}{}{}".format(ent[0],ent[1],ent[2]))
-        path_plt = or_gautam.or_gautam_meth(settings,MnO_lattice, MnO_unit_cell, V_lattice,V_unit_cell,ent)
-        pltI.plot_intens(path_plt,0,select)
+        path_plt, file_name = or_gautam.or_gautam_meth(settings,MnO_lattice, MnO_unit_cell, V_lattice,V_unit_cell,ent)
+        pltI.plot_intens(path_plt,0,select,file_name)
     
         print("Total Time: {}".format(time.time()-start))
 
