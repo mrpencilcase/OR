@@ -49,7 +49,7 @@ V_lattice.name = "V"
 
 if select == 1:
     hkl = [ 
-        [4,4,4]
+        [5,5,5]
         ]
     start = time.time()
 
