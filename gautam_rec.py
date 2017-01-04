@@ -38,7 +38,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
 
 
     """
-    MATERIAL A: calculate the CRLPs and theire coresponding intensits 
+    calculate the CRLPs and theire coresponding intensits 
     """
     #transform lattice to orthonormal basis
     #latticeA_orth = or_fkt.orthon_trans(lattA.a,lattA.b,lattA.c,lattA.alpha,lattA.beta,lattA.gamma) 
@@ -51,6 +51,12 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
     map_intens = []
     hkl_a = []
     hkl_b = []
+
+    """
+    Determin the larger reciprocal structure of the two materials and apply the given hkl values to it
+    for the smaller structure the maximal hkl values are choosen so that roughly the same reciprpcal 
+    space is coverd.
+    """
     if la.norm(latticeA_rec[0,:]) <= la.norm(latticeB_rec[0,:]):
        
        hkl_a.append(int(hkl[0] * la.norm(latticeB_rec[0,:]) / la.norm(latticeA_rec[0,:])))
@@ -76,8 +82,12 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
     delta0 = 0.20
     intensA = []
     gA = []
-    h = -hkl_a[0]
     rlpA = []
+    
+    intensB=[]                       
+    gB = []
+    rlpB = []
+    h = -hkl_a[0]
     while h <= hkl_a[0]:
         gh = latticeA_rec[0] * h       
         k = -hkl_a[1]    
@@ -93,14 +103,34 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
                 l += 1                
             k += 1
         h += 1
-    
+
+    h=-hkl_b[0]    
+    while h <= hkl_b[0]:
+        gh = latticeB_rec[0] * h       
+        k = -hkl_b[1]    
+        while k <= hkl_b[1]:
+            ghk = latticeB_rec[1] * k + gh
+            l = -hkl_b[2]
+            while l <= hkl_b[2]:
+                if sum(map(abs,[h,k,l])) > 0: 
+                    g = latticeB_rec[2] * l + ghk
+                    #intensB.append(or_fkt.intensity_lattice_point1(unitB,g))
+                    intensB.append(or_fkt.intensity_lattice_point2(unitB,[h,k,l],g))
+                    gB.append(g)
+                l += 1                
+            k += 1
+        h += 1
+
+    #Find the maximal Intensities in A and B. 
+    ImaxA = max(intensA)
+    ImaxB = max(intensB)
     """
     Rotate material B in the set increments and calculate the overlaping 
     intenseties for each iteration
     
     """
+
     alpha = alpha_start
-    latticeB_orth = or_fkt.orthon_trans(lattB.a,lattB.b,lattB.c,lattB.alpha,lattB.beta,lattB.gamma)
     start = time.time()
     while alpha <= alpha_end:
         beta =beta_start
@@ -110,41 +140,13 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
             gamma = gamma_start 
             #start_time = time.time()
             while gamma <= gamma_end:
-                    #print("alpha: " + str(np.rad2deg(alpha))+"°")
-                    #print("gamma   : {:.1f}°".format(np.rad2deg(gamma)))
-
-                    latticeB_rec = or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB_rec,gamma),beta),alpha)          
-                    intensB=[]                       
-                    gB = []
-                    h=-hkl_b[0]
-                    while h <= hkl_b[0]:
-                        gh = latticeB_rec[0] * h       
-                        k = -hkl_b[1]    
-                        while k <= hkl_b[1]:
-                            ghk = latticeB_rec[1] * k + gh
-                            l = -hkl_b[2]
-                            while l <= hkl_b[2]:
-                                if sum(map(abs,[h,k,l])) > 0: 
-                                    g = latticeB_rec[2] * l + ghk
-                                    #intensB.append(or_fkt.intensity_lattice_point1(unitB,g))
-                                    intensB.append(or_fkt.intensity_lattice_point2(unitB,[h,k,l],g))
-                                    gB.append(g)
-                                l += 1                
-                            k += 1
-                        h += 1
-                    
-                    #Find the maximal Intensities in A and B.       
-                    ImaxA = max(intensA)
-                    ImaxB = max(intensB)
-
-                    # determin all reciprocal lattice points within R for both crystals
-                    # calculate the the overlaping volumes of the reciprocal lattice points
-                    # and summ it up
+                          
+                    gB_rot = or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(gB,gamma),beta),alpha)
                     tot_intens = 0   
                     numb_overl = 0 
                     #start = time.time()
                     for intAi, gAi in zip(intensA,gA):
-                        for intBj, gBj in zip(intensB,gB):
+                        for intBj, gBj in zip(intensB,gB_rot):
                                                    
                             d = la.norm(gAi-gBj)
                             d1 = 1/(la.norm(gAi))
@@ -172,7 +174,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
                     map_intens.append([tot_intens,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
                     gamma = gamma +gamma_inc
                     
-            print("alpha: {:5.1f}   beta: {:5.1f}  intensity:{:7.1f}  time: {:5.1f}".format(np.rad2deg(alpha),np.rad2deg(beta),tot_intens,time.time()-start))
+            print("alpha: {:5.1f}   beta: {:5.1f}  intensity:{:10.1f}  time: {:5.1f}".format(np.rad2deg(alpha),np.rad2deg(beta),tot_intens,time.time()-start))
             beta = beta + beta_inc  
         alpha = alpha + alpha_inc
     
@@ -186,15 +188,16 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
                                                           np.rad2deg(alpha_start),np.rad2deg(alpha_end),
                                                           np.rad2deg(beta_start),np.rad2deg(beta_end))
 
-    path_save = "{}_{}".format(settings.path_save,file_name)
+    path_save = "{}{}.dat".format(settings.path_save,file_name)
     with open(path_save,"w") as dat:
         dat.write("# Interface between {} and {}\n".format(lattA.name,lattB.name))
-        dat.write("# Alpha = {:.1f}-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha_start),np.rad2deg(alpha_end),np.rad2deg(alpha_inc) ))
-        dat.write("# Beta = {:.1f}-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta_start),np.rad2deg(beta_end),np.rad2deg(beta_inc) ))
-        dat.write("# Gamma = {:.1f}-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(gamma_start),np.rad2deg(gamma_end),np.rad2deg(gamma_inc) ))
+        dat.write("# Alpha = {:.1f}-{:.1f}� in {:.1f}� increments\n".format(np.rad2deg(alpha_start),np.rad2deg(alpha_end),np.rad2deg(alpha_inc) ))
+        dat.write("# Beta = {:.1f}-{:.1f}� in {:.1f}� increments\n".format(np.rad2deg(beta_start),np.rad2deg(beta_end),np.rad2deg(beta_inc) ))
+        dat.write("# Gamma = {:.1f}-{:.1f}� in {:.1f}� increments\n".format(np.rad2deg(gamma_start),np.rad2deg(gamma_end),np.rad2deg(gamma_inc) ))
         dat.write("# delta0 = {:.2f}\n".format(delta0))
         #dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
         dat.write("# HKL up to = {} {} {}\n".format(hkl[0],hkl[1],hkl[2]))
+        dat.write("# Calculation Time: {:5.1f} sec \n".format(time.time()-start))
         for ent in  map_intens:
             dat.write("{:f} {:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2],ent[3]))
 

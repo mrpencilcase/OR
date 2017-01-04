@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="call_OR.py" />
+    <Compile Include="gautam_rec.py" />
     <Compile Include="or_class.py" />
     <Compile Include="or_fkt.py" />
     <Compile Include="or_gautam.py" />

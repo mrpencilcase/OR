@@ -37,6 +37,7 @@ def plot_intens(path,gamma_select,select,file_name):
                         alpha.append(float(line[1]))
                         beta.append(float(line[2]))
         
+        
                 
         fig = plt.figure()
         ax = fig.gca(projection='3d')
@@ -55,7 +56,8 @@ def plot_intens(path,gamma_select,select,file_name):
                 os.makedirs("{}/plots".format(path_dir))
                 
         fig.savefig("{}/plots/{}.pdf".format(path_dir,file_name))    
-        plt.close(fig)
+        plt.show(fig)
+        #plt.close(fig)
 
     elif select == 2:
         with open(path,"r") as Vfile:
