@@ -22,13 +22,13 @@ select = 1
 path_skript = os.path.dirname(os.path.realpath(__file__))
 
 settings = or_class.OrSetting()
-settings.alpha_inc = np.deg2rad(5)
+settings.alpha_inc = np.deg2rad(2.5)
 settings.alpha_start = np.deg2rad(0)
-settings.alpha_end = np.deg2rad(180)
+settings.alpha_end = np.deg2rad(90)
 
-settings.beta_inc = np.deg2rad(5)
+settings.beta_inc = np.deg2rad(2.5)
 settings.beta_start = np.deg2rad(0)
-settings.beta_end = np.deg2rad(180)
+settings.beta_end = np.deg2rad(90)
 
 settings.gamma_inc = np.deg2rad(5)
 settings.gamma_start = np.deg2rad(0)
@@ -59,8 +59,8 @@ Cr5Al8_lattice.name = "Cr5Al8"
 
 MatB_lattice = Al2O3_lattice
 MatB_cell = Al2O3_cell
-MatA_lattice = Cr2Al_lattice
-MatA_cell = Cr2Al_cell
+MatA_lattice = Cr5Al8_lattice
+MatA_cell = Cr5Al8_cell
 
 
 if select == 1:
