@@ -113,7 +113,6 @@ def hkl_max(rezVec,R):
         g =np.sqrt(np.square(rezVec[0]*miller)+np.square(rezVec[1]*miller)+np.square(rezVec[2]*miller))
     return miller -1
     
-     
 # Rotate lattice around the [1,0,0] axis
 def rot_x(lattice,alpha):
     c = np.cos(alpha)
@@ -125,6 +124,7 @@ def rot_x(lattice,alpha):
     
     lattice_rot = np.dot(lattice,rot_m)
     return lattice_rot    
+
 # Rotate lattice around the [0,0,1] axis
 def rot_z(lattice,alpha):
     c = np.cos(alpha)
@@ -135,9 +135,7 @@ def rot_z(lattice,alpha):
                        [ 0,-s, c] ])
     
     lattice_rot = np.dot(lattice,rot_m)
-    return lattice_rot
-    
-    
+    return lattice_rot   
     
 def read_data(path,supercell):
     """
@@ -315,3 +313,117 @@ def intensity_overlap_tot(Ij,Ri,d,HWj):
     ij = (ij + (HWj2 - d2) /HWj * (np.arctan((Ri + d)/ HWj)- np.arctan(d/HWj)))* 2*Ij /(np.pi*HWj)
 
     return ij
+
+def find_max_inten(path, count):
+  
+    raw_data = []
+    return_data = []
+
+    with open(path, "r") as dat:
+        data = list(dat)
+
+        for ent in data:
+            if "#" not in ent:   
+                line = [x for x in ent.split()]          
+                intens = (float(line[0]))
+                alpha = (float(line[1]))
+                beta = (float(line[2]))
+                gamma = (float(line[3]))
+                raw_data.append([intens,alpha,beta,gamma])
+
+    data_sorted = sorted(raw_data, key=getKey)
+
+    for i in range(count):
+        return_data.append(raw_data[-i])
+    
+    return return_data
+
+def getKey(item):
+    return item[0]
+
+def get_hkl(latticeA,latticeB,hkl):
+
+    hkl_a = []
+    hkl_b = []
+
+    if la.norm(latticeA[0,:]) <= la.norm(latticeB[0,:]):
+       
+        hkl_a.append(int(hkl[0] * la.norm(latticeB[0,:]) / la.norm(latticeA[0,:])))
+        hkl_a.append(int(hkl[1] * la.norm(latticeB[1,:]) / la.norm(latticeA[1,:])))
+        hkl_a.append(int(hkl[2] * la.norm(latticeB[2,:]) / la.norm(latticeA[2,:])))
+       
+        hkl_b.append(hkl[0])
+        hkl_b.append(hkl[1])
+        hkl_b.append(hkl[2])
+       
+         
+    elif la.norm(latticeB[0,:]) < la.norm(latticeA[0,:]):
+
+       hkl_b.append(int(hkl[0] * la.norm(latticeA[0,:]) / la.norm(latticeB[0,:])))
+       hkl_b.append(int(hkl[1] * la.norm(latticeA[1,:]) / la.norm(latticeB[1,:])))
+       hkl_b.append(int(hkl[2] * la.norm(latticeA[2,:]) / la.norm(latticeB[2,:])))
+
+       hkl_a.append(hkl[0])
+       hkl_a.append(hkl[1])
+       hkl_a.append(hkl[2])
+
+    return hkl_a, hkl_b
+
+def calc_intensities(hkl, lattice,unit_cell):
+    g = [] 
+    intens =  []
+    hkl_v = []
+
+    h = -hkl[0]
+
+    while h <= hkl[0]:
+        gh = lattice[0] * h       
+        k = -hkl[1]    
+        while k <= hkl[1]:
+            ghk = lattice[1] * k + gh
+            l = -hkl[2]
+            while l <= hkl[2]:
+                if sum(map(abs,[h,k,l])) > 0: 
+                    ghkl = lattice[2] * l + ghk
+                    intens.append(intensity_lattice_point2(unit_cell,[h,k,l],ghkl))
+                    g.append(ghkl)   
+                    hkl_v.append([h,k,l])     
+                l += 1                
+            k += 1
+        h += 1
+
+    return intens, g, hkl_v
+
+def overlap_lattices(intensA,gA,hkl_a,intensB,gB,hkl_b,ImaxA,ImaxB,delta0):
+    tot_intens = 0  
+    singel_intens = [] 
+    numb_overl = 0 
+
+    for intAi, gAi, hkla in zip(intensA,gA,hkl_a):
+        for intBj, gBj, hklb in zip(intensB,gB,hkl_b):
+                                                   
+            d = la.norm(gAi-gBj)
+            d1 = 1/(la.norm(gAi))
+            p = delta0/(6*d1*(ImaxA+ImaxB))
+            Ri = 6*intAi*p
+            Rj = 6*intBj*p
+            HWi = intAi*p
+            HWj = intBj*p
+            #Only overlapping spheres are from interest
+            if d < Ri + Rj:
+                if d + Rj <= Ri:
+                    I1 = intensity_overlap_tot(intAi,Rj,d,HWi)
+                    I2 = intBj
+                    singel_intens.append([I1+I2, gAi,hkla,gBj,hklb])
+                    tot_intens += I1 + I2
+                elif d + Ri <= Rj:
+                    I1 = intensity_overlap_tot(intBj,Ri,d,HWj)
+                    I2 = intAi
+                    singel_intens.append([I1+I2, gAi,hkla,gBj,hklb])
+                    tot_intens += I1 + I2
+                else:
+                    I1 = intensity_overlap_part(intAi,Ri,Rj,d,HWi)
+                    I2 = intensity_overlap_part(intBj,Rj,Ri,d,HWj)
+                    singel_intens.append([I1+I2, gAi, hkla , gBj, hklb])
+                    tot_intens += I1 + I2
+    return tot_intens , singel_intens

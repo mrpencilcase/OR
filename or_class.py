@@ -13,8 +13,6 @@ class OrSetting:
         def __init__(self):       
             self.path_save = "no path yet"
             self.method = "no methode selected"            
-            self.R_scale = 0
-            self.r_scale = 0.0
             self.alpha_start = 0 
             self.alpha_end = 0
             self.alpha_inc = 1 

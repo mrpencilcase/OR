@@ -1,157 +1,151 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 09 09:41:42 2016
+Created on Fri Dec 02 11:10:35 2016
 
 @author: Lukas
-"""  
+"""
+
 import numpy as np
+from numpy import linalg as la
 import or_fkt
 import math
 import os 
 import time
 
-def or_main_fkt(settings,matA,matB):
- 
-    
-    # paths to the two crystal phases directories need OUTCAR and CONTCAR
-    alpha_max = settings.alpha_max
-    alpha_inc = settings.alpha_inc
-    beta_max = settings.beta_max
-    beta_inc = settings.beta_inc
-    gamma_max = settings.gamma_max
-    gamma_inc = settings.gamma_inc
-    R_scale = settings.R_scale
-    r_scale = settings.r_scale
- 
-    # calculate the lattice of material A in an orthonormal coordinate system
-    # and calculate the reviprcal lattice of the new lattice
+def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
 
-    latticeA = np.vstack((matA.a, matA.b,matA.c))
-    latticeA_rec = or_fkt.reziprocal_lattice(latticeA)    
-    latticeB = np.vstack((matB.a, matB.b, matB.c))
+    """
+    Find OR of two materials following the methode proposed by Gautam and Howe.
+    Input:    
+    Settings:   provides the parameters for the rotaion of material B aswell as informations
+                where to save the results.
+    lattA/B:    provides the parameters of the lattice of material A and B .
+    unitA/B:    contains the atomes and theire positions within the unit cell.
+    hkl: 
+    Output:
+    The function itself does not return values but creates a file in which the overlapping 
+    intensitys, and the corresponding angles are listed.
+    """
+    alpha_start = settings.alpha_start
+    alpha_end = settings.alpha_end
+    alpha_inc = settings.alpha_inc
+    beta_start = settings.beta_start
+    beta_end = settings.beta_end
+    beta_inc = settings.beta_inc
+    gamma_start = settings.gamma_start
+    gamma_end = settings.gamma_end
+    gamma_inc = settings.gamma_inc
+    delta0 = 0.20
+
+    """
+    calculate the CRLPs and theire coresponding intensits 
+    """
+
+    #transform lattice to orthonormal basis
+    latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
+    latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
+    latticeB_orth = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
+    latticeB_rec = or_fkt.reziprocal_lattice_Gautam(latticeB_orth)
+    #calculate atom positons in new basis
+    #latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
+    #latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
+    #latticeA_rec = or_fkt.reziprocal_lattice(latticeA) 
+    #latticeB_rec = or_fkt.reziprocal_lattice(latticeB)             
+    map_intens = []
+   
+
+    """
+    Determin the larger reciprocal structure of the two materials and apply the given hkl values to it
+    for the smaller structure the maximal hkl values are choosen so that roughly the same reciprpcal 
+    space is coverd.
+    """
+    hkl_a_max, hkl_b_max = or_fkt.get_hkl(latticeA_rec,latticeB_rec,hkl)
+
+    intensA, gA, hkl_a= or_fkt.calc_intensities(hkl_a_max, latticeA_rec, unitA)
+    intensB, gB, hkl_b = or_fkt.calc_intensities(hkl_b_max, latticeB_rec, unitB)
+      
+    #Find the maximal Intensities in A and B. 
+    ImaxA = max(intensA)
+    ImaxB = max(intensB)
+    """
+    Rotate material B in the set increments and calculate the overlaping 
+    intenseties for each iteration
     
-    # calculate the lattice of material B in an orthonormal coordinate system
-    # the reciprokal lattice of B will be calculated later since it is the 
-    # one that will be rotated
-    
-    # set the maximal radius of R and r
-    # R defines how many lattice planes are looked at
-    # r sets the volumes around the reciprocal lattice points.
-    R = R_scale * np.sqrt(sum(np.square(latticeA_rec[0])))
-    r = r_scale * np.sqrt(sum(np.square(latticeA_rec[0])))
-    V_RLP = np.pi*4*np.power(r,3)/3
-    
-    # find the maximal miller indizes of mat A which are within of R along the 
-    # three reciprocal lattice vectors. 
-    h_max = or_fkt.hkl_max(latticeA_rec[0],R)
-    k_max = or_fkt.hkl_max(latticeA_rec[1],R)
-    l_max = or_fkt.hkl_max(latticeA_rec[2],R)   
-    # Calculate all RLP's of A that are in an sphere with a radius of R 
-    A_rlp=[]
-    h=-h_max
-    while h <= h_max:
-        
-        k = -k_max 
-        while k <= k_max:
-            l = -l_max        
-            while l <= l_max:
-                g = latticeA_rec[0]*h + latticeA_rec[1]*k + latticeA_rec[2]*l
-                gnorm = np.sqrt(sum(np.square(g)))                
-                if  gnorm <= R and gnorm > 0: 
-                    A_rlp.append([g[0],g[1],g[2]])
-                l = l+  1
-            k =k  + 1
-        h = h + 1 
-    
-    
-    Valpha=[]            
-    ri = r
-    rj = r
-    r2= 2*r 
-    pi12 = np.pi/12
-    start_calc = time.time()
-    alpha = 0
-    while alpha <= alpha_max:
-        beta =0
-        start_inc = time.time() 
-        while beta <= beta_max:
+    """
+
+    alpha = alpha_start
+    start = time.time()
+    while alpha <= alpha_end:
+        beta =beta_start
+        while beta <= beta_end:
             
-                       
-            gamma = 0 
+            start_inc = time.time()            
+            gamma = gamma_start 
             #start_time = time.time()
-            while gamma <= gamma_max:
-                    #print("alpha: " + str(np.rad2deg(alpha))+"°")
-                    #print("gamma   : {:.1f}°".format(np.rad2deg(gamma)))
-                
-                        
-                    latticeB_rec = or_fkt.reziprocal_lattice(or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(latticeB,gamma),beta),alpha))
-                    # find the maximal h,k and l values.
-                    B_rlp=[]       
-                    h_max = or_fkt.hkl_max(latticeB_rec[0],R)
-                    k_max = or_fkt.hkl_max(latticeB_rec[1],R)
-                    l_max = or_fkt.hkl_max(latticeB_rec[2],R)   
-                  
-                  
-                  
-                    h=-h_max
-                    while h <= h_max:
-                        k = -k_max 
-                        gh = latticeB_rec[0]*h
-                        while k <= k_max:
-                            l = -l_max        
-                            gk = gh + latticeA_rec[1]*k                            
-                            while l <= l_max:
-                                g =  gk + latticeB_rec[2]*l
-                                gnorm = np.sqrt(sum(np.square(g)))                
-                                if  gnorm <= R and gnorm > 0:  
-                                     B_rlp.append([g[0],g[1],g[2]])             
-                                l = l+ 1
-                            k = k + 1
-                        h = h + 1     
-            
-                    # determin all reciprocal lattice points within R for both crystals
-                    # calculate the the overlaping volumes of the reciprocal lattice points
-                    # and summ it up
-                    Vab = 0   
-                    
-                    #start = time.time()
-                    for entA in A_rlp:
-                        for entB in B_rlp:
-                            d = (entA[0]-entB[0])*(entA[0]-entB[0])
-                            d = d + (entA[1]-entB[1])*(entA[1]-entB[1])
-                            d = d + (entA[2]-entB[2])* (entA[2]-entB[2])
-                            d = np.sqrt(d)
-                            # d = np.sqrt(np.square(entA[0]-entB[0])+np.square(entA[1]-entB[1])+np.square(entA[2]-entB[2]))       
-                            
-                            
-                            if d <= r2 and d > 0:
-                                # Vij = np.pi/(12*d)*np.square(ri+rj-d)*(np.square(d)+2*d*(ri+rj)-3*np.square(ri-rj))
-                                Vab = Vab + (pi12/d)*(r2-d)*(r2-d) * (d*d + 2*d*r2)
-                            elif d == 0:
-                                Vab += V_RLP
-                    # print("Time_inc :"+ str(time.time()-start)) 
-                    # print("Time_tot:" + str(time.time()-start_calc))
-                    # print("Overlapping Volume :" + str(Vab))
-                    # print("")    
-                    Valpha.append([Vab,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
+            while gamma <= gamma_end:
+                          
+                    gB_rot = or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(gB,gamma),beta),alpha)
+                    tot_intens,dummy = or_fkt.overlap_lattices(intensA,gA,hkl_a,intensB,gB_rot,hkl_b,ImaxA,ImaxB,delta0)
+                    map_intens.append([tot_intens,np.rad2deg(alpha), np.rad2deg(beta), np.rad2deg(gamma)])
                     gamma = gamma +gamma_inc
                     
-            
-            beta = beta + beta_inc
-        print("R: {}   r: {:.2f}   alpha: {:5.1f}    time_tot: {:.2f}   time_inc: {:.2f}".format(R_scale,r_scale,np.rad2deg(alpha),time.time()-start_calc,time.time()-start_inc))  
+            print("alpha: {:5.1f}   beta: {:5.1f}  intensity:{:10.1f}  time: {:5.1f}".format(np.rad2deg(alpha),np.rad2deg(beta),tot_intens,time.time()-start))
+            beta = beta + beta_inc  
         alpha = alpha + alpha_inc
     
     
     
     #print("Run Time: " + str(time.time()-start_calc))
     #print("")
-    path_save = settings.path_save+"/V_"+matA.name+"_"+matB.name+"_R"+str(R_scale)+"_r"+str(r_scale)+".dat"
+    #path_save = settings.path_save+lattA.name+"_"+lattB.name + "_HKL_"+str(hkl[0])+str(hkl[1])+str(hkl[2])+"_d0_"+str(delta0)+ ".dat"
+    file_name = "{}_{}_HKL_{}{}{}_d0_{}_a{}_{}_b{}_{}".format(lattA.name, lattB.name,
+                                                          hkl[0],hkl[1],hkl[2],delta0,
+                                                          np.rad2deg(alpha_start),np.rad2deg(alpha_end),
+                                                          np.rad2deg(beta_start),np.rad2deg(beta_end))
+
+    path_save = "{}{}.dat".format(settings.path_save,file_name)
     with open(path_save,"w") as dat:
-        dat.write("# Interface between {} and {}\n".format(matA.name,matB.name))
-        dat.write("# Alpha = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(alpha_max),np.rad2deg(alpha_inc) ))
-        dat.write("# Beta = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(beta_max),np.rad2deg(beta_inc) ))
-        dat.write("# Gamma = 0-{:.1f}° in {:.1f}° increments\n".format(np.rad2deg(gamma_max),np.rad2deg(gamma_inc) ))
-        dat.write("# R = {} r = {}\n".format(R_scale,r_scale))    
-        for ent in  Valpha:
+        dat.write("# Interface between {} and {}\n".format(lattA.name,lattB.name))
+        dat.write("# Alpha = {:.1f}-{:.1f}? in {:.1f}? increments\n".format(np.rad2deg(alpha_start),np.rad2deg(alpha_end),np.rad2deg(alpha_inc) ))
+        dat.write("# Beta = {:.1f}-{:.1f}? in {:.1f}? increments\n".format(np.rad2deg(beta_start),np.rad2deg(beta_end),np.rad2deg(beta_inc) ))
+        dat.write("# Gamma = {:.1f}-{:.1f}? in {:.1f}? increments\n".format(np.rad2deg(gamma_start),np.rad2deg(gamma_end),np.rad2deg(gamma_inc) ))
+        dat.write("# delta0 = {:.2f}\n".format(delta0))
+        dat.write("# HKL up to = {} {} {}\n".format(hkl[0],hkl[1],hkl[2]))
+        dat.write("# Calculation Time: {:5.1f} sec \n".format(time.time()-start))
+        
+        for ent in  map_intens:
             dat.write("{:f} {:f} {:f} {:f}\n".format(ent[0],ent[1],ent[2],ent[3]))
-    return path_save
+
+    return path_save, file_name
+
+def io_gautam_meth(angles,lattA,unitA,lattB,unitB,hkl):
+    """
+    The function looks into the different sett of angels and returns the individual overlabpping
+    intensities of the spots.  
+    """
+
+    latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
+    latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
+    latticeB_orth = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
+    latticeB_rec = or_fkt.reziprocal_lattice_Gautam(latticeB_orth)
+    
+    #calculate atom positons in new basis
+    #latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
+    #latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
+    #latticeA_rec = or_fkt.reziprocal_lattice(latticeA) 
+    #latticeB_rec = or_fkt.reziprocal_lattice(latticeB)  
+    
+    hkl_a_max, hkl_b_max = or_fkt.get_hkl(latticeA_rec,latticeB_rec,hkl)
+
+    intensA, gA, hkl_a= or_fkt.calc_intensities(hkl_a_max, latticeA_rec, unitA)
+    intensB, gB, hkl_b = or_fkt.calc_intensities(hkl_b_max, latticeB_rec, unitB)
+      
+    #Find the maximal Intensities in A and B. 
+    ImaxA = max(intensA)
+    ImaxB = max(intensB)   
+
+    for ent in angles:
+        gB_rot = or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(gB,ent[3]),ent[2]),ent[3])
+        tot_intens, singel_intens = or_fkt.overlap_lattices(intensA,gA,hkl_a,intensB,gB_rot,hkl_b,ImaxA,ImaxB,delta0)
+    
+    return tot_intens

@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{fed14868-0b37-424a-88ed-e1a15ac72b87}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>call_OR.py</StartupFile>
+    <StartupFile>or_start.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -25,19 +25,11 @@
     <Content Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="call_OR.py" />
-    <Compile Include="gautam_rec.py" />
+    <Compile Include="or_start.py" />
+    <Compile Include="or_main.py" />
     <Compile Include="or_class.py" />
     <Compile Include="or_fkt.py" />
-    <Compile Include="or_gautam.py" />
-    <Compile Include="or_main.py" />
-    <Compile Include="plot_angel_Volume.py" />
-    <Compile Include="plot_couchy.py" />
-    <Compile Include="plot_rec_lat.py" />
-    <Compile Include="scattering_factors_tool.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="test_structure_factr.py" />
+    <Compile Include="or_plot_intensity.py" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
