@@ -12,6 +12,7 @@ class OrSetting:
     
         def __init__(self):       
             self.path_save = "no path yet"
+            self.name = "no name given yet"
             self.method = "no methode selected"            
             self.alpha_start = 0 
             self.alpha_end = 0

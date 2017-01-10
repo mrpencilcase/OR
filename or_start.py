@@ -19,11 +19,11 @@ import or_plot_intensity as pltI
 path_skript = os.path.dirname(os.path.realpath(__file__))
 
 settings = or_class.OrSetting()
-settings.alpha_inc = np.deg2rad(30)
+settings.alpha_inc = np.deg2rad(5)
 settings.alpha_start = np.deg2rad(0)
 settings.alpha_end = np.deg2rad(90)
 
-settings.beta_inc = np.deg2rad(30)
+settings.beta_inc = np.deg2rad(5)
 settings.beta_start = np.deg2rad(0)
 settings.beta_end = np.deg2rad(90)
 
@@ -62,7 +62,7 @@ MatA_cell = MgO_cell
 
 
 hkl = [ 
-    [2,2,2]
+    [4,4,4]
     ]
 
 start = time.time()
@@ -73,8 +73,8 @@ for ent in hkl:
     print("hkl set to {}{}{}".format(ent[0],ent[1],ent[2]))
 
     # determin the overlapping intensities 
-    path_plt, file_name = or_main.or_gautam_meth(settings,MatA_lattice, MatA_cell, MatB_lattice,MatB_cell,ent)
-    pltI.plot_intens(path_plt,0,file_name)
+    path_plt, settings.name = or_main.or_gautam_meth(settings,MatA_lattice, MatA_cell, MatB_lattice,MatB_cell,ent)
+    pltI.plot_intens(path_plt,0,settings.name)
 
     # closer look into the orientaions with the largest intensities
     max_intens = or_fkt.find_max_inten(path_plt,5)

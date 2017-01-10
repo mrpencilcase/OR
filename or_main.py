@@ -42,15 +42,15 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
     """
 
     #transform lattice to orthonormal basis
-    latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
-    latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
-    latticeB_orth = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
-    latticeB_rec = or_fkt.reziprocal_lattice_Gautam(latticeB_orth)
+    #latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
+    #latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
+    #latticeB_orth = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
+    #latticeB_rec = or_fkt.reziprocal_lattice_Gautam(latticeB_orth)
     #calculate atom positons in new basis
-    #latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
-    #latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
-    #latticeA_rec = or_fkt.reziprocal_lattice(latticeA) 
-    #latticeB_rec = or_fkt.reziprocal_lattice(latticeB)             
+    latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
+    latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
+    latticeA_rec = or_fkt.reziprocal_lattice(latticeA) 
+    latticeB_rec = or_fkt.reziprocal_lattice(latticeB)             
     map_intens = []
    
 
@@ -128,16 +128,16 @@ def io_gautam_meth(settings,angles,lattA,unitA,lattB,unitB,hkl):
     """
     io_data = []
 
-    latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
-    latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
-    latticeB_orth = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
-    latticeB_rec = or_fkt.reziprocal_lattice_Gautam(latticeB_orth)
+    #latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
+    #latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
+    #latticeB_orth = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
+    #latticeB_rec = or_fkt.reziprocal_lattice_Gautam(latticeB_orth)
     
     #calculate atom positons in new basis
-    #latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
-    #latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
-    #latticeA_rec = or_fkt.reziprocal_lattice(latticeA) 
-    #latticeB_rec = or_fkt.reziprocal_lattice(latticeB)  
+    latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
+    latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
+    latticeA_rec = or_fkt.reziprocal_lattice(latticeA) 
+    latticeB_rec = or_fkt.reziprocal_lattice(latticeB)  
     
     hkl_a_max, hkl_b_max = or_fkt.get_hkl(latticeA_rec,latticeB_rec,hkl)
 
@@ -156,14 +156,12 @@ def io_gautam_meth(settings,angles,lattA,unitA,lattB,unitB,hkl):
     if not os.path.exists("{}/IO".format(settings.path_save)):
             os.makedirs("{}/IO".format(settings.path_save))
 
-    with open("{}/IO/test.dat".format(settings.path_save),"w") as file:
+    with open("{}/IO/{}.dat".format(settings.path_save,settings.name),"w") as file:
         for io,ang in zip(io_data,angles):
             file.write("#Total Intensity: {}\n".format(ang[0]))
             file.write("#Angles: {} {} {}\n".format(ang[1],ang[2],ang[3]))
             for ent in io:
                 angel_gA_gB = np.rad2deg(or_fkt.angle_between(ent[1],ent[3]))
-                print(ent[1])
-                print(ent[3])
                 file.write("({},{},{})||({},{},{})    {}    {}\n".format(ent[2][0],ent[2][1],ent[2][2],ent[4][0],ent[4][1],ent[4][2],angel_gA_gB,ent[0]))
 
 
