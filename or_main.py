@@ -101,9 +101,12 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
     file_name = "{}_{}_HKL_{}{}{}_d0_{}_a{}_{}_b{}_{}".format(lattA.name, lattB.name,
                                                           hkl[0],hkl[1],hkl[2],delta0,
                                                           np.rad2deg(alpha_start),np.rad2deg(alpha_end),
+    
                                                           np.rad2deg(beta_start),np.rad2deg(beta_end))
+    if not os.path.exists("{}OR".format(settings.path_save)):
+            os.makedirs("{}OR".format(settings.path_save))
 
-    path_save = "{}{}.dat".format(settings.path_save,file_name)
+    path_save = "{}\OR\{}.dat".format(settings.path_save,file_name)
     with open(path_save,"w") as dat:
         dat.write("# Interface between {} and {}\n".format(lattA.name,lattB.name))
         dat.write("# Alpha = {:.1f}-{:.1f}? in {:.1f}? increments\n".format(np.rad2deg(alpha_start),np.rad2deg(alpha_end),np.rad2deg(alpha_inc) ))
@@ -118,11 +121,12 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
 
     return path_save, file_name
 
-def io_gautam_meth(angles,lattA,unitA,lattB,unitB,hkl):
+def io_gautam_meth(settings,angles,lattA,unitA,lattB,unitB,hkl):
     """
     The function looks into the different sett of angels and returns the individual overlabpping
     intensities of the spots.  
     """
+    io_data = []
 
     latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
     latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
@@ -143,9 +147,25 @@ def io_gautam_meth(angles,lattA,unitA,lattB,unitB,hkl):
     #Find the maximal Intensities in A and B. 
     ImaxA = max(intensA)
     ImaxB = max(intensB)   
-
+    delta0 = 0.20
     for ent in angles:
-        gB_rot = or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(gB,ent[3]),ent[2]),ent[3])
+        gB_rot = or_fkt.rot_z(or_fkt.rot_x(or_fkt.rot_z(gB,np.deg2rad(ent[3])),np.deg2rad(ent[2])),np.deg2rad(ent[1]))
         tot_intens, singel_intens = or_fkt.overlap_lattices(intensA,gA,hkl_a,intensB,gB_rot,hkl_b,ImaxA,ImaxB,delta0)
+        io_data.append(singel_intens)
+    
+    if not os.path.exists("{}/IO".format(settings.path_save)):
+            os.makedirs("{}/IO".format(settings.path_save))
+
+    with open("{}/IO/test.dat".format(settings.path_save),"w") as file:
+        for io,ang in zip(io_data,angles):
+            file.write("#Total Intensity: {}\n".format(ang[0]))
+            file.write("#Angles: {} {} {}\n".format(ang[1],ang[2],ang[3]))
+            for ent in io:
+                angel_gA_gB = np.rad2deg(or_fkt.angle_between(ent[1],ent[3]))
+                print(ent[1])
+                print(ent[3])
+                file.write("({},{},{})||({},{},{})    {}    {}\n".format(ent[2][0],ent[2][1],ent[2][2],ent[4][0],ent[4][1],ent[4][2],angel_gA_gB,ent[0]))
+
+
     
     return tot_intens

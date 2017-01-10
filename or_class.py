@@ -22,6 +22,7 @@ class OrSetting:
             self.gamma_start = 0
             self.gamma_end = 0 
             self.gamma_inc = 1 
+            self.numb_intens = 4
             
 
 class Lattice:

@@ -33,6 +33,8 @@ settings.gamma_end = np.deg2rad(0)
 
 settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results\\"
 
+settings.numb_intens = 5 
+
 # Read Data for both materials form CONTCAR like files
 path_folder = path_skript + "\\Cont\\"
 
@@ -62,18 +64,22 @@ MatA_cell = MgO_cell
 hkl = [ 
     [2,2,2]
     ]
+
 start = time.time()
+
 print("Find Orientational Relationship between {} and {}".format(MatA_lattice.name,MatB_lattice.name))
+
 for ent in hkl:
     print("hkl set to {}{}{}".format(ent[0],ent[1],ent[2]))
 
+    # determin the overlapping intensities 
     path_plt, file_name = or_main.or_gautam_meth(settings,MatA_lattice, MatA_cell, MatB_lattice,MatB_cell,ent)
-
-    max_intens = or_fkt.find_max_inten(path_plt,5)
-
-    or_main.io_gautam_meth(max_intens,MatA_lattice, MatA_cell, MatB_lattice,MatB_cell,ent)
-
     pltI.plot_intens(path_plt,0,file_name)
+
+    # closer look into the orientaions with the largest intensities
+    max_intens = or_fkt.find_max_inten(path_plt,5)
+    io_data = or_main.io_gautam_meth(settings,max_intens,MatA_lattice, MatA_cell, MatB_lattice,MatB_cell,ent)
+        
     
     print("Total Time: {}".format(time.time()-start))
 

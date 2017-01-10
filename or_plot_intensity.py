@@ -6,7 +6,7 @@ Created on Thu Nov 17 09:57:20 2016
 """
 
 import numpy as np
-#from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,7 +28,6 @@ def plot_intens(path,gamma_select,file_name):
         hkl = [data[5].split()[5],data[5].split()[6],data[5].split()[7]]
         for ent in data:
             if "#" in ent:
-                    
                 print(ent.rstrip())
             else:
                 line = [x for x in ent.split()]
