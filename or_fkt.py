@@ -37,9 +37,11 @@ def orthon_trans(a_v,b_v,c_v,alpha,beta,gamma):
     t11 = a
     t12 = b*np.cos(gamma)
     t13 = c* np.cos(gamma) 
+
     t21 = 0
     t22 = b*np.sin(gamma)
     t23 = c*((np.cos(alpha)-np.cos(beta)*np.cos(gamma))/np.sin(gamma))
+    
     t31 = 0
     t32 = 0
     t33 = np.power(np.cos(alpha),2) + np.power(np.cos(beta),2) - 2*np.cos(alpha)*np.cos(beta)*np.cos(gamma) 
@@ -88,6 +90,7 @@ def reziprocal_lattice_Gautam(lattice):
     
     return rl
 # Conventional algorithm to calculate the reciprocal lattice
+
 def reziprocal_lattice(lattice_real):
     
     a1 = lattice_real[0,:]
@@ -236,7 +239,7 @@ def intensity_lattice_point1(unit_cell,g):
     I = (np.square(I1) - np.square(I2)).real
     return I
 
-def intensity_lattice_point2(unit_cell,hkl,g):
+def intensity_lattice_point2(unit_cell,hkl,g,T):
     
     g_norm = la.norm(g)   
     I1 = 0
@@ -247,7 +250,7 @@ def intensity_lattice_point2(unit_cell,hkl,g):
         fj = at_scat_factr(ent,g_norm)      
         for at in unit_cell.atoms:
             if ent == at.element:    
-                rj = at.coord
+                rj = np.dot(at.coord,T)
                 alpha = rj[0]*hkl[0] + rj[1]*hkl[1]+ rj[2]*hkl[2]
                 alpha = alpha*pi2
                 I1 = I1 + fj * cmath.cos(alpha)
@@ -369,7 +372,7 @@ def get_hkl(latticeA,latticeB,hkl):
 
     return hkl_a, hkl_b
 
-def calc_intensities(hkl, lattice,unit_cell):
+def calc_intensities(hkl, lattice,unit_cell,T):
     g = [] 
     intens =  []
     hkl_v = []
@@ -385,7 +388,7 @@ def calc_intensities(hkl, lattice,unit_cell):
             while l <= hkl[2]:
                 if sum(map(abs,[h,k,l])) > 0: 
                     ghkl = lattice[2] * l + ghk
-                    intens.append(intensity_lattice_point2(unit_cell,[h,k,l],ghkl))
+                    intens.append(intensity_lattice_point2(unit_cell,[h,k,l],ghkl,T))
                     g.append(ghkl)   
                     hkl_v.append([h,k,l])     
                 l += 1                

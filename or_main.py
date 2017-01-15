@@ -37,15 +37,19 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
     gamma_inc = settings.gamma_inc
     delta0 = 0.20
 
+    I = np.eye(3)
+
     """
     calculate the CRLPs and theire coresponding intensits 
     """
 
     #transform lattice to orthonormal basis
-    #latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
-    #latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
-    #latticeB_orth = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
-    #latticeB_rec = or_fkt.reziprocal_lattice_Gautam(latticeB_orth)
+    #TA = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
+    #lattice_A = np.transpose(TA)
+    #latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(TA)
+    #TB = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
+    #lattice_B = np.transpose(TA)
+    #latticeB_rec = or_fkt.reziprocal_lattice_Gautam(TB)
     #calculate atom positons in new basis
     latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
     latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
@@ -61,8 +65,8 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
     """
     hkl_a_max, hkl_b_max = or_fkt.get_hkl(latticeA_rec,latticeB_rec,hkl)
 
-    intensA, gA, hkl_a= or_fkt.calc_intensities(hkl_a_max, latticeA_rec, unitA)
-    intensB, gB, hkl_b = or_fkt.calc_intensities(hkl_b_max, latticeB_rec, unitB)
+    intensA, gA, hkl_a = or_fkt.calc_intensities(hkl_a_max, latticeA_rec, unitA,I)
+    intensB, gB, hkl_b = or_fkt.calc_intensities(hkl_b_max, latticeB_rec, unitB,I)
       
     #Find the maximal Intensities in A and B. 
     ImaxA = max(intensA)
@@ -128,11 +132,17 @@ def io_gautam_meth(settings,angles,lattA,unitA,lattB,unitB,hkl):
     """
     io_data = []
 
-    #latticeA_orth = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
-    #latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(latticeA_orth)
-    #latticeB_orth = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
-    #latticeB_rec = or_fkt.reziprocal_lattice_Gautam(latticeB_orth)
+    I = np.eye(3)
+
+
+    #TA = or_fkt.orthon_trans(lattA.a, lattA.b, lattA.c, lattA.alpha, lattA.beta, lattA.gamma) 
+    #lattice_A = np.transpose(TA)
+    #latticeA_rec  = or_fkt.reziprocal_lattice_Gautam(TA)
+    #TB = or_fkt.orthon_trans(lattB.a, lattB.b, lattB.c, lattB.alpha, lattB.beta, lattB.gamma)
+    #lattice_B = np.transpose(TA)
+    #latticeB_rec = or_fkt.reziprocal_lattice_Gautam(TB)
     
+
     #calculate atom positons in new basis
     latticeA = np.vstack((lattA.a,lattA.b,lattA.c))
     latticeB = np.vstack((lattB.a,lattB.b,lattB.c))
@@ -141,8 +151,8 @@ def io_gautam_meth(settings,angles,lattA,unitA,lattB,unitB,hkl):
     
     hkl_a_max, hkl_b_max = or_fkt.get_hkl(latticeA_rec,latticeB_rec,hkl)
 
-    intensA, gA, hkl_a= or_fkt.calc_intensities(hkl_a_max, latticeA_rec, unitA)
-    intensB, gB, hkl_b = or_fkt.calc_intensities(hkl_b_max, latticeB_rec, unitB)
+    intensA, gA, hkl_a= or_fkt.calc_intensities(hkl_a_max, latticeA_rec, unitA,I)
+    intensB, gB, hkl_b = or_fkt.calc_intensities(hkl_b_max, latticeB_rec, unitB,I)
       
     #Find the maximal Intensities in A and B. 
     ImaxA = max(intensA)
@@ -161,9 +171,7 @@ def io_gautam_meth(settings,angles,lattA,unitA,lattB,unitB,hkl):
             file.write("#Total Intensity: {}\n".format(ang[0]))
             file.write("#Angles: {} {} {}\n".format(ang[1],ang[2],ang[3]))
             for ent in io:
-                angel_gA_gB = np.rad2deg(or_fkt.angle_between(ent[1],ent[3]))
-                file.write("({},{},{})||({},{},{})    {}    {}\n".format(ent[2][0],ent[2][1],ent[2][2],ent[4][0],ent[4][1],ent[4][2],angel_gA_gB,ent[0]))
-
-
+                #angel_gA_gB = np.rad2deg(or_fkt.angle_between(ent[1],ent[3]))
+                file.write("({:2d},{:2d},{:2d})||({:2d},{:2d},{:2d})   {:8.1f}\n".format(ent[2][0],ent[2][1],ent[2][2],ent[4][0],ent[4][1],ent[4][2],ent[0]))
     
     return tot_intens
