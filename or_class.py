@@ -59,12 +59,26 @@ class UnitCell:
         self.atoms =  []
         self.elements = []
     def ad_atom(self,ele,coordinates):
-        adatom = atom()
+        adatom = Atom()
         adatom.element=ele
         adatom.coord=coordinates
         self.atoms.append(adatom)
-class atom:
+class Atom:
     def __init__(self):
         self.element = "no element"
         self.coord = [0,0,0]
-        
+
+class Material:
+    def __init__(self):
+        self.lattice = "no lattice yet"
+        self.unitcell = " no unit cell yet"
+
+class Plane:
+
+    def __init__(self):
+        self.atompositon = []
+
+    def ad_atom(self,coordinates):
+        self.atompositon.append(coordinates)
+
+    

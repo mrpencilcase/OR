@@ -15,28 +15,29 @@ import or_fkt
 import or_class
 import or_plot_intensity as pltI
 
+
 # Settings for the calculations
 path_skript = os.path.dirname(os.path.realpath(__file__))
 
 settings = or_class.OrSetting()
 settings.alpha_inc = np.deg2rad(5)
 settings.alpha_start = np.deg2rad(0)
-settings.alpha_end = np.deg2rad(360)
+settings.alpha_end = np.deg2rad(90)
 
 settings.beta_inc = np.deg2rad(5)
 settings.beta_start = np.deg2rad(0)
-settings.beta_end = np.deg2rad(360)
+settings.beta_end = np.deg2rad(90)
 
 settings.gamma_inc = np.deg2rad(5)
 settings.gamma_start = np.deg2rad(0)
-settings.gamma_end = np.deg2rad(360)
+settings.gamma_end = np.deg2rad(90)
 
-settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "\\Results\\"
+settings.path_save = os.path.abspath(os.path.join(path_skript,os.pardir)) + "/Results"
 
 settings.numb_intens = 5 
 
 # Read Data for both materials form CONTCAR like files
-path_folder = path_skript + "\\Cont\\"
+path_folder = path_skript + "/Cont/"
 
 MgO_lattice, MgO_cell = or_fkt.read_data(path_folder + "MgO" ,[1,1,1])
 MgO_lattice.name = "MgO"
@@ -60,10 +61,10 @@ Ag_lattice, Ag_cell = or_fkt.read_data(path_folder + "Ag" ,[1,1,1])
 Ag_lattice.name = "Ag"
 
 
-MatB_lattice = Cr2Al_lattice
-MatB_cell = Cr2Al_cell
-MatA_lattice = Al2O3_lattice
-MatA_cell = Al2O3_cell
+#MatB_lattice = Cr2Al_lattice
+#MatB_cell = Cr2Al_cell
+#MatA_lattice = Al2O3_lattice
+#MatA_cell = Al2O3_cell
 
 
 #MatB_lattice = Cr5Al8_lattice
@@ -71,10 +72,10 @@ MatA_cell = Al2O3_cell
 #MatA_lattice = Al2O3_lattice
 #MatA_cell = Al2O3_cell
 
-#MatB_lattice = V_lattice
-#MatB_cell = V_cell
-#MatA_lattice = MgO_lattice
-#MatA_cell = MgO_cell
+MatB_lattice = V_lattice
+MatB_cell = V_cell
+MatA_lattice = MgO_lattice
+MatA_cell = MgO_cell
 
 #MatB_lattice = Ag_lattice
 #MatB_cell = Ag_cell

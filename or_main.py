@@ -110,7 +110,7 @@ def or_gautam_meth(settings,lattA,unitA,lattB,unitB, hkl):
     if not os.path.exists("{}OR".format(settings.path_save)):
             os.makedirs("{}OR".format(settings.path_save))
 
-    path_save = "{}\OR\{}.dat".format(settings.path_save,file_name)
+    path_save = "{}/OR/{}.dat".format(settings.path_save,file_name)
     with open(path_save,"w") as dat:
         dat.write("# Interface between {} and {}\n".format(lattA.name,lattB.name))
         dat.write("# Alpha = {:.1f}-{:.1f}? in {:.1f}? increments\n".format(np.rad2deg(alpha_start),np.rad2deg(alpha_end),np.rad2deg(alpha_inc) ))

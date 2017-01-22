@@ -54,7 +54,7 @@ def orthon_trans(a_v,b_v,c_v,alpha,beta,gamma):
           
     return t
     
-def new_at_coord(T, unti_cell_base):
+def new_at_coord(T, unit_cell_base):
     """
     transforms array of atom positions to a new basis
     uing the transformation matrix T
@@ -69,10 +69,8 @@ def new_at_coord(T, unti_cell_base):
     unit_cell_trans = or_class.unitcell()
     unit_cell_trans.name = unit_cell_base.name
 
-    for atom in unit_cell_case.atoms:
+    for atom in unit_cell_base.atoms:
         at_coord_new = 1
-
-   
     return at_coord_new
 # Calculate the reziprokal lattice vectors a*, b* and c* by inverting orhonomral basis 
 def reziprocal_lattice_Gautam(lattice):    
@@ -97,6 +95,7 @@ def reziprocal_lattice(lattice_real):
     a2 = lattice_real[1,:]
     a3 = lattice_real[2,:]
     Ve = np.dot(a1,np.cross(a2,a3))
+    
 
     g1 = 2 * np.pi * (np.cross(a2,a3))/Ve
     g2 = 2 * np.pi * (np.cross(a3,a1))/Ve
@@ -209,7 +208,8 @@ def select_data(signature,data):
             sdata_float = [float(x) for x in sdata ]            
             np.asarray(sdata_float)            
             return sdata_float
-            
+    
+                
 def def_lattice(name,a,b,c):
     latt = or_class.Lattice()
     latt.a=a
@@ -448,3 +448,30 @@ def angle_between(v1, v2):
 def unit_vector(vector):
     """ Returns the unit vector of the vector.  """
     return vector / np.linalg.norm(vector)
+
+
+def get_planes(Mat,hkl):
+    
+    
+    plane_atoms = []
+    R = 2 # radius around the atom positions
+
+    xs = 1
+    ys = 1
+    zs = 1
+    A = 1
+    B = 1 
+    C = 1 
+    
+    for ent in Mat.unitcell.atoms:
+    
+        t = A * xs + B * ys + C * zs
+        t = t/(A*A + B*B + C*C)
+        xc = xs + A * t
+        yc = ys + B * t
+        zc = zs + C * t
+
+        d = np.sqrt(np.square(xs-xc) + np.square(ys-yc) +np.square(zs-zc))
+
+        if d <= R:
+            plane_atoms.append([xc,yc,zc])

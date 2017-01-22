@@ -25,6 +25,12 @@
     <Content Include="ToDo.txt" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="fit_lattice_planes.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="setup.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="or_start.py" />
     <Compile Include="or_main.py" />
     <Compile Include="or_class.py" />
