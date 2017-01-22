@@ -1,2 +1,0 @@
-Calculate the atom positions with the new orthogonal basis
-
