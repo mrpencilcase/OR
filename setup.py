@@ -1,13 +1,17 @@
 import os
+import shutil
 
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ex
 
-for ent in os.listdir():
-    if os.path.isfile(ent) == TRUE:
 
+path = os.path.dirname(os.path.realpath(__file__))
 
+for ent in os.listdir(path):
+    if os.path.isfile(os.path.join(path,ent)) == TRUE:
+        if ".py"  in ent and ".pyx"  not in ent:
+            shutil.copyfile(os.path.join(path,ent),os.path.join(path,ent+"x"))            
 
     
 ext_modules=[

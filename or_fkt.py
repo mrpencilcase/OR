@@ -72,6 +72,7 @@ def new_at_coord(T, unit_cell_base):
     for atom in unit_cell_base.atoms:
         at_coord_new = 1
     return at_coord_new
+
 # Calculate the reziprokal lattice vectors a*, b* and c* by inverting orhonomral basis 
 def reziprocal_lattice_Gautam(lattice):    
     """
@@ -87,8 +88,8 @@ def reziprocal_lattice_Gautam(lattice):
     rl = np.linalg.pinv(lattice)
     
     return rl
-# Conventional algorithm to calculate the reciprocal lattice
 
+# Conventional algorithm to calculate the reciprocal lattice
 def reziprocal_lattice(lattice_real):
     
     a1 = lattice_real[0,:]
